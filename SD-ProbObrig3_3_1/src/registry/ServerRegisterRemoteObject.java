@@ -39,7 +39,7 @@ public class ServerRegisterRemoteObject {
         /* instantiate a registration remote object and generate a stub for it */
         RegisterRemoteObject regEngine = new RegisterRemoteObject(rmiRegHostName, rmiRegPortNumb);
         Register regEngineStub = null;
-        int listeningPort = 22000;
+        int listeningPort = RegistryConfiguration.RMI_REGISTER_PORT;
         /* it should be set accordingly in each case */
 
         try {
