@@ -2,6 +2,8 @@ package interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
+import settings.Piece;
 
 /**
  *

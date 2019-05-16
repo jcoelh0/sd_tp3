@@ -2,13 +2,15 @@ package interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.HashMap;
+import settings.EnumPiece;
 
 /**
  *
  * @author André Oliveira
  * @author João Coelho
  */
-public interface ParkInterface extends Remote {
+public interface RepositoryInterface extends Remote {
 
     public void updateLog() throws RemoteException;
 
