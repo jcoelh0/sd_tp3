@@ -1,15 +1,13 @@
 package shared.OutsideWorld;
 
-import communication.ChannelClient;
-import static communication.ChannelPorts.NAME_GENERAL_REPOSITORY;
-import static communication.ChannelPorts.PORT_GENERAL_REPOSITORY;
 import entities.Manager.Interfaces.IManagerOW;
 import entities.Customer.Interfaces.ICustomerOW;
 import entities.Customer.States.CustomerState;
+import interfaces.RepositoryInterface;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import messages.RepositoryMessage.RepositoryMessage;
+import settings.Constants;
 
 /**
  *
@@ -17,18 +15,19 @@ import messages.RepositoryMessage.RepositoryMessage;
  * @author João Coelho
  */
 public class OutsideWorld implements ICustomerOW, IManagerOW {
-
-    private ChannelClient cc_repository;
     
     private final List<Integer> repairedCars;
     private final List<Integer> waitingForCar;
     private final String[] vehicleDriven;
 
-    /**
-     *
-     * @param nCustomers number of customers
-     */
-    public OutsideWorld(int nCustomers) {
+    String rmiRegHostName;
+    int rmiRegPortNumb;
+    private final RepositoryInterface repositoryInterface;
+    
+    public OutsideWorld(RepositoryInterface repository, String rmiRegHostName, int rmiRegPortNumb) {
+        
+        int nCustomers = Constants.N_CUSTOMERS;
+        
         this.waitingForCar = new ArrayList<>();
         this.repairedCars = new ArrayList<>();
         vehicleDriven = new String[nCustomers];
@@ -39,7 +38,10 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
                 vehicleDriven[i] = Integer.toString(i);
             }
         }
-        this.cc_repository = new ChannelClient(NAME_GENERAL_REPOSITORY, PORT_GENERAL_REPOSITORY);
+        
+        this.repositoryInterface = repository;
+        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegHostName = rmiRegHostName;
     }
     
     /**
@@ -52,7 +54,7 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
      */
     @Override
     public synchronized boolean decideOnRepair(int id) {
-        setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
+        //setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
         Random requires = new Random();
         Random n = new Random();
         int randomNum = 0;
@@ -61,10 +63,10 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
         }
         boolean req = requires.nextBoolean();
         if(req == true) {
-            updateRequiresCar("T", id);
+            //updateRequiresCar("T", id);
         }
         else {
-            updateRequiresCar("F", id);
+            //updateRequiresCar("F", id);
         }
         return req;
     }
@@ -79,8 +81,8 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
      */
     @Override
     public synchronized boolean backToWorkByBus(boolean carRepaired, int id) {
-        setCustomerState(CustomerState.NORMAL_LIFE_WITHOUT_CAR, id);
-        updateVehicleDriven("--", id);
+        //setCustomerState(CustomerState.NORMAL_LIFE_WITHOUT_CAR, id);
+        //updateVehicleDriven("--", id);
         vehicleDriven[id] = "--";
         if (!carRepaired) {
             waitingForCar.add(id);
@@ -110,15 +112,15 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
      */
     @Override
     public synchronized boolean backToWorkByCar(boolean carRepaired, int replacementCar, int id) {
-        setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
+        //setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
         if (replacementCar == -1) {
             if (id < 10) {
-                updateVehicleDriven("0"+Integer.toString(id), id);
+                //updateVehicleDriven("0"+Integer.toString(id), id);
             } else {
-                updateVehicleDriven(Integer.toString(id), id);
+                //updateVehicleDriven(Integer.toString(id), id);
             }
         } else {
-            updateVehicleDriven("R" + Integer.toString(replacementCar), id);
+            //updateVehicleDriven("R" + Integer.toString(replacementCar), id);
         }
         if (!carRepaired) {
             waitingForCar.add(id);
@@ -130,11 +132,11 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
 
                 }
             }
-            updateVehicleDriven("--", id);
+            //updateVehicleDriven("--", id);
             return true;
         }
         else {
-            updateRepairedCar("T", id);
+            //updateRepairedCar("T", id);
         }
         return true;
     }
@@ -166,6 +168,7 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
         }
     }
     
+    /*
     private synchronized void setCustomerState(CustomerState state, int id) {
         RepositoryMessage response;
         startCommunication(cc_repository);
@@ -208,4 +211,5 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
             }
         }
     }
+*/
 }

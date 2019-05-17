@@ -1,11 +1,9 @@
 package shared.SupplierSite;
 
-import communication.ChannelClient;
-import static communication.ChannelPorts.NAME_GENERAL_REPOSITORY;
-import static communication.ChannelPorts.PORT_GENERAL_REPOSITORY;
 import entities.Manager.Interfaces.IManagerSS;
-import messages.RepositoryMessage.RepositoryMessage;
+import interfaces.RepositoryInterface;
 import settings.Piece;
+import settings.Constants;
 
 /**
  *
@@ -13,24 +11,26 @@ import settings.Piece;
  * @author João Coelho
  */
 public class SupplierSite implements IManagerSS {
-
-    private ChannelClient cc_repository;
     
     private Piece partNeeded;
     private int[] piecesBought;
 
-    /**
-     * SupplierSite constructor. Initialises the array containing pieces bought
-     * by the manager over time.
-     *
-     * @param nTypePieces number of type of pieces
-     */
-    public SupplierSite(int nTypePieces) {
-        this.cc_repository = new ChannelClient(NAME_GENERAL_REPOSITORY, PORT_GENERAL_REPOSITORY);
+    String rmiRegHostName;
+    int rmiRegPortNumb;
+    private final RepositoryInterface repositoryInterface;
+    
+    public SupplierSite(RepositoryInterface repository, String rmiRegHostName, int rmiRegPortNumb) {
+        
+        int nTypePieces = Constants.N_TYPE_PIECES;
+        
         piecesBought = new int[nTypePieces];
         for (int i = 0; i < nTypePieces; i++) {
             piecesBought[i] = 0;
         }
+        
+        this.repositoryInterface = repository;
+        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegHostName = rmiRegHostName;
     }
 
     /**
@@ -46,7 +46,7 @@ public class SupplierSite implements IManagerSS {
         System.out.println("Manager - Bought " + randomNum + " of " + partNeeded);
         this.partNeeded = partNeeded;
         piecesBought[partNeeded.getTypePiece().ordinal()] += randomNum;
-        updatePiecesBought(piecesBought);
+        //updatePiecesBought(piecesBought);
         return randomNum;
     }
 
@@ -61,6 +61,7 @@ public class SupplierSite implements IManagerSS {
         return piecesBought;
     }
     
+    /*
     private synchronized void updatePiecesBought(int[] piecesBought) {
         RepositoryMessage response;
         startCommunication(cc_repository);
@@ -79,4 +80,5 @@ public class SupplierSite implements IManagerSS {
             }
         }
     }
+*/
 }

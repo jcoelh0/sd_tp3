@@ -1,19 +1,17 @@
 package shared.Park;
 
-import communication.ChannelClient;
-import static communication.ChannelPorts.NAME_GENERAL_REPOSITORY;
-import static communication.ChannelPorts.PORT_GENERAL_REPOSITORY;
 import entities.Mechanic.Interfaces.IMechanicP;
 import entities.Manager.Interfaces.IManagerP;
 import entities.Customer.Interfaces.ICustomerP;
 import entities.Customer.States.CustomerState;
 import entities.Mechanic.States.MechanicState;
+import interfaces.RepositoryInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import messages.RepositoryMessage.RepositoryMessage;
+import settings.Constants;
 
 /**
  *
@@ -21,8 +19,6 @@ import messages.RepositoryMessage.RepositoryMessage;
  * @author João Coelho
  */
 public class Park implements ICustomerP, IMechanicP, IManagerP {
-
-    private ChannelClient cc_repository;
     
     private int parkingSlots = 50;
     private int numcars = 0;
@@ -34,18 +30,23 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
     private final List<Integer> toReserve = new ArrayList<>();
     private int findCarId;
 
-    /**
-     * Park Constructor. Initialises the replacement cars in the park.
-     *
-     * @param nReplacementCars the number of replacement cars
-     */
-    public Park(int nReplacementCars) {
+    String rmiRegHostName;
+    int rmiRegPortNumb;
+    private final RepositoryInterface repositoryInterface;
+    
+    public Park(RepositoryInterface repository, String rmiRegHostName, int rmiRegPortNumb) {
+        
+        int nReplacementCars = Constants.N_REPLACEMENT_CARS;
+        
         for (int i = 1; i < nReplacementCars + 1; i++) {
             replacementCars.add(i);
         }
         numrepcars = nReplacementCars;
-        this.cc_repository = new ChannelClient(NAME_GENERAL_REPOSITORY, PORT_GENERAL_REPOSITORY);
-        updateNumRepCars(numrepcars);
+        //updateNumRepCars(numrepcars);
+        
+        this.repositoryInterface = repository;
+        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegHostName = rmiRegHostName;
     }
 
     /**
@@ -56,11 +57,11 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
      */
     @Override
     public synchronized void parkCar(int id) {
-        setCustomerState(CustomerState.PARK, id);
+        //setCustomerState(CustomerState.PARK, id);
         carsParked.add(id);
         parkingSlots--;
         numcars++;
-        updateNumCars(numcars);        
+        //updateNumCars(numcars);        
     }
 
     /**
@@ -72,10 +73,10 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
      */
     @Override
     public synchronized void findCar(int id, int replacementCarId) {
-        setCustomerState(CustomerState.PARK, id);
+        //setCustomerState(CustomerState.PARK, id);
         replacementCars.remove(replacementCarId);
         numrepcars--;
-        updateNumRepCars(numrepcars);
+        //updateNumRepCars(numrepcars);
     }
 
     /**
@@ -87,11 +88,11 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
      */
     @Override
     public synchronized void getVehicle(int idCar, int idMechanic) {
-        setMechanicState(MechanicState.FIXING_CAR, idMechanic);
+        //setMechanicState(MechanicState.FIXING_CAR, idMechanic);
         carsParked.remove(new Integer(idCar));
         parkingSlots++;
         numcars--;
-        updateNumCars(numcars);
+        //updateNumCars(numcars);
     }
 
     /**
@@ -105,7 +106,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
     public synchronized void returnReplacementCar(int idCar, int idCustomer) {
         replacementCars.add(idCar);
         numrepcars++;
-        updateNumRepCars(numrepcars);
+        //updateNumRepCars(numrepcars);
     }
 
     /**
@@ -119,7 +120,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
         carsParked.add(id);
         parkingSlots--;
         numcars++;
-        updateNumCars(numcars);
+        //updateNumCars(numcars);
     }
 
     /**
@@ -168,6 +169,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
     public synchronized void waitForCustomer(int id) {
     }
     
+    /*
     private synchronized void setCustomerState(CustomerState state, int id) {
         RepositoryMessage response;
         startCommunication(cc_repository);
@@ -210,4 +212,5 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
             }
         }
     }
+    */
 }

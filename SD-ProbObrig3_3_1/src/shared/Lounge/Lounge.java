@@ -1,20 +1,18 @@
 package shared.Lounge;
 
-import communication.ChannelClient;
-import static communication.ChannelPorts.NAME_GENERAL_REPOSITORY;
-import static communication.ChannelPorts.PORT_GENERAL_REPOSITORY;
 import entities.Mechanic.Interfaces.IMechanicL;
 import entities.Manager.Interfaces.IManagerL;
 import entities.Customer.Interfaces.ICustomerL;
 import entities.Customer.States.CustomerState;
 import entities.Manager.States.ManagerState;
 import entities.Mechanic.States.MechanicState;
+import interfaces.RepositoryInterface;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-import messages.RepositoryMessage.RepositoryMessage;
 import settings.Piece;
+import settings.Constants;
 
 /**
  *
@@ -22,8 +20,6 @@ import settings.Piece;
  * @author João Coelho
  */
 public class Lounge implements ICustomerL, IManagerL, IMechanicL {
-    
-    private ChannelClient cc_repository;
 
     private final Queue<Integer> replacementQueue = new LinkedList<>();
     private final HashMap<Integer, Integer> customersWithRepCar = new HashMap<>();
@@ -42,15 +38,17 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
 
     private static HashMap<Integer, String> order = new HashMap<Integer, String>();
     
-    /**
-     *
-     * @param nCustomers number of customers
-     * @param nTypePieces number of type of pieces
-     */
-    public Lounge(int nCustomers, int nTypePieces) {
-        requiresReplacementCar = new boolean[nCustomers];
+    String rmiRegHostName;
+    int rmiRegPortNumb;
+    private final RepositoryInterface repositoryInterface;
+    
+    public Lounge(RepositoryInterface repository, String rmiRegHostName, int rmiRegPortNumb) {
+        requiresReplacementCar = new boolean[Constants.N_CUSTOMERS];
         Arrays.fill(requiresReplacementCar, false);
-        this.cc_repository = new ChannelClient(NAME_GENERAL_REPOSITORY, PORT_GENERAL_REPOSITORY);
+        
+        this.repositoryInterface = repository;
+        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegHostName = rmiRegHostName;
     }
 
     /**
@@ -61,9 +59,9 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void queueIn(int id) {
-        setCustomerState(CustomerState.RECEPTION, id);
+        //setCustomerState(CustomerState.RECEPTION, id);
         customersQueue.add(id);
-        setCustomersQueueSize(customersQueue.size());
+        //setCustomersQueueSize(customersQueue.size());
         notifyAll();
         while(customersQueue.contains(id) && !managerAvailable) {
             try {
@@ -189,7 +187,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
         readyToReceive = false;
         payed = true;
         notifyAll();        
-        setCustomersQueueSize(customersQueue.size());
+        //setCustomersQueueSize(customersQueue.size());
     }
 
     /**
@@ -216,7 +214,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized int currentCustomer() {
-        setManagerState(ManagerState.ATTENDING_CUSTOMER);
+        //setManagerState(ManagerState.ATTENDING_CUSTOMER);
         nextCustomer = customersQueue.poll();
         notify();
         return nextCustomer;
@@ -232,9 +230,9 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized boolean collectKey(int id) {
-        setCustomerState(CustomerState.WAITING_FOR_REPLACE_CAR, id);
+        //setCustomerState(CustomerState.WAITING_FOR_REPLACE_CAR, id);
         replacementQueue.add(id);
-        setReplacementQueueSize(replacementQueue.size());
+        //setReplacementQueueSize(replacementQueue.size());
         notifyAll();
         while (!customersWithRepCar.containsKey(id) && !carsRepaired.contains(id)) { //&& !carsRepaired.contains(id)
             try {
@@ -244,7 +242,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
             }
         }
         replacementQueue.remove(id);
-        setReplacementQueueSize(replacementQueue.size());
+        //setReplacementQueueSize(replacementQueue.size());
         if (carsRepaired.contains(id)) {
             carsRepaired.remove(id);
             requiresReplacementCar[id] = false;
@@ -274,7 +272,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void checkWhatToDo() {
-        setManagerState(ManagerState.CHECKING_WHAT_TO_DO);
+        //setManagerState(ManagerState.CHECKING_WHAT_TO_DO);
     }
 
     /**
@@ -285,7 +283,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized int getIdToCall() {
-        setManagerState(ManagerState.ALERTING_CUSTOMER);
+        //setManagerState(ManagerState.ALERTING_CUSTOMER);
         int next = customersToCallQueue.poll();
         return next;
     }
@@ -321,7 +319,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void alertManager(Piece piece, int customerId, int idMechanic) {
-        setMechanicState(MechanicState.ALERTING_MANAGER, idMechanic);
+        //setMechanicState(MechanicState.ALERTING_MANAGER, idMechanic);
         if (piece == null) {
             System.out.println("Mechanic " + idMechanic + " - Customer " + customerId + " car is repaired!");
             customersToCallQueue.add(customerId);
@@ -341,7 +339,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized Piece getPieceToReStock() {
-        setManagerState(ManagerState.GETTING_NEW_PARTS);
+        //setManagerState(ManagerState.GETTING_NEW_PARTS);
         Piece p = piecesQueue.poll();
         return p;
     }
@@ -352,7 +350,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void goReplenishStock() {
-        setManagerState(ManagerState.REPLENISH_STOCK);
+        //setManagerState(ManagerState.REPLENISH_STOCK);
     }
 
     /**
@@ -377,7 +375,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
     @Override
     public synchronized boolean alertCustomer(int id) {
         carsRepaired.add(id);
-        updateCarsRepaired(carsRepaired.size());
+        //updateCarsRepaired(carsRepaired.size());
         if (replacementQueue.contains(id)) {
             customersToCallQueue.remove(id);
             notifyAll();
@@ -417,17 +415,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
         return carsRepaired.size();
     }
 
-    /**
-     * Method used for log. Retrieves which type of piece is missing.
-     *
-     * @return an array of booleans that is false if the manager was alerted
-     * that that piece is missing
-     *
-     *//*
-    public boolean[] getFlagPartMissing() {
-        return flagPartMissing;
-    }*/
-    
+    /*    
     private synchronized void setManagerState(ManagerState state) {
         RepositoryMessage response;
         startCommunication(cc_repository);
@@ -486,4 +474,6 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
             }
         }
     }
+    */
+
 }
