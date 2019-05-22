@@ -46,7 +46,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
         
         this.repositoryInterface = repository;
         this.rmiRegHostName = rmiRegHostName;
-        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegPortNumb = rmiRegPortNumb;
     }
 
     /**

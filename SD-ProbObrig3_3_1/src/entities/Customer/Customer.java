@@ -1,11 +1,14 @@
 package entities.Customer;
 
 import entities.Customer.States.CustomerState;
-import communication.ChannelClient;
-import static communication.ChannelPorts.*;
-import messages.LoungeMessage.LoungeMessage;
-import messages.OutsideWorldMessage.OutsideWorldMessage;
-import messages.ParkMessage.ParkMessage;
+import interfaces.LoungeInterface;
+import interfaces.OutsideWorldInterface;
+import interfaces.ParkInterface;
+import interfaces.RepairAreaInterface;
+import interfaces.RepositoryInterface;
+import interfaces.SupplierSiteInterface;
+import java.rmi.RemoteException;
+import shared.OutsideWorld.OutsideWorld;
 
 /**
  * 
@@ -29,124 +32,153 @@ public class Customer extends Thread {
     private boolean happyCustomer = false;
     private boolean haveReplacementCar = false;
     private int replacementCar;
+	private final OutsideWorldInterface outsideWorldInt;
+	private final LoungeInterface loungeInt;
+	private final RepairAreaInterface repairAreaInt;
+	private final SupplierSiteInterface supplierSiteInt;
+	private final ParkInterface parkInt;
+	private final RepositoryInterface repositoryInt;
 
-    private ChannelClient cc_outside_world;
-    private ChannelClient cc_park;
-    private ChannelClient cc_lounge;
 
     /**
      * Instantiation of a customer.
      * @param i represents its id.
+	 * @param loungeInt
+	 * @param outsideWorldInt
+	 * @param supplierSiteInt
+	 * @param repairAreaInt
+	 * @param parkInt
+	 * @param repositoryInt
      */
-    public Customer(int i) {
+    public Customer(int i, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
         this.id = i;
-        this.cc_outside_world = new ChannelClient(NAME_OUTSIDE_WORLD, PORT_OUTSIDE_WORLD);
-        this.cc_park = new ChannelClient(NAME_PARK, PORT_PARK);
-        this.cc_lounge = new ChannelClient(NAME_LOUNGE, PORT_LOUNGE);
+		this.loungeInt = loungeInt;
+		this.outsideWorldInt = outsideWorldInt;
+		this.supplierSiteInt = supplierSiteInt;
+		this.repairAreaInt = repairAreaInt;
+		this.parkInt = parkInt;
+		this.repositoryInt = repositoryInt;		
     }
 
-    private void openChannel(ChannelClient cc, String name) {
-        while (!cc.open()) {
-            System.out.println(name + " not open.");
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
-
-            }
-        }
-    }
 
     private boolean decideOnRepair() {
-        OutsideWorldMessage response;
-        openChannel(cc_outside_world, "Customer " + this.id + ": Outside World");
-        cc_outside_world.writeObject(new OutsideWorldMessage(OutsideWorldMessage.DECIDE_ON_REPAIR, this.id));
-        response = (OutsideWorldMessage) cc_outside_world.readObject();
-        cc_outside_world.close();
-        return response.getBoolResponse();
+		boolean temp = false;
+        try { 
+            temp = outsideWorldInt.decideOnRepair(id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private boolean backToWorkByCar(boolean carRepaired, int replacementCar) {
-        OutsideWorldMessage response;
-        openChannel(cc_outside_world, "Customer " + this.id + ": Outside World");
-        cc_outside_world.writeObject(new OutsideWorldMessage(OutsideWorldMessage.BACK_TO_WORK_BY_CAR, this.id, carRepaired, replacementCar));
-        response = (OutsideWorldMessage) cc_outside_world.readObject();
-        cc_outside_world.close();
-        return response.getBoolResponse();
+        boolean temp = false;
+        try { 
+            temp = outsideWorldInt.backToWorkByCar(carRepaired, replacementCar, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private void parkCar() {
-        ParkMessage response;
-        openChannel(cc_park, "Customer " + this.id + ": Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.PARK_CAR, this.id));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
+        try { 
+            parkInt.parkCar(id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void returnReplacementCar(int replacementCar) {
-        ParkMessage response;
-        openChannel(cc_park, "Customer " + this.id + ": Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.RETURN_REPLACEMENT_CAR, this.id, replacementCar));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
+        try { 
+            parkInt.returnReplacementCar(replacementCar, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private boolean collectKey() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Customer " + this.id + ": Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.COLLECT_KEY, this.id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getBoolResponse();
+        boolean temp = false;
+        try { 
+            temp = loungeInt.collectKey(id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private int getCarReplacementId(int id) {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Customer " + this.id + ": Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.GET_REPLACEMENT_CAR, id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getCustId();
+        int temp = 0;
+        try { 
+            temp = loungeInt.getCarReplacementId(id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private void findCar(int replacementCar) {
-        ParkMessage response;
-        openChannel(cc_park, "Customer " + this.id + ": Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.FIND_CAR, this.id, replacementCar));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
+        try { 
+            parkInt.findCar(id, replacementCar);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void queueIn() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Customer " + this.id + ": Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.QUEUE_IN, this.id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try { 
+            loungeInt.queueIn(id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void talkWithManager(boolean carRepaired, boolean requiresCar) {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Customer " + this.id + ": Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.TALK_WITH_MANAGER, this.id, carRepaired, requiresCar));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try { 
+            loungeInt.talkWithManager(carRepaired, requiresCar, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void payForTheService() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Customer " + this.id + ": Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.PAY_FOR_THE_SERVICE, this.id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try { 
+            loungeInt.payForTheService();
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private boolean backToWorkByBus(boolean carRepaired) {
-        OutsideWorldMessage response;
-        openChannel(cc_outside_world, "Customer " + this.id + ": Outside World");
-        cc_outside_world.writeObject(new OutsideWorldMessage(OutsideWorldMessage.BACK_TO_WORK_BY_BUS, this.id, carRepaired));
-        response = (OutsideWorldMessage) cc_outside_world.readObject();
-        cc_outside_world.close();
-        return response.getBoolResponse();
+        boolean temp = false;
+        try { 
+            temp = outsideWorldInt.backToWorkByBus(carRepaired, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     @Override
@@ -230,73 +262,5 @@ public class Customer extends Thread {
             return;
         }
         this.state = state;
-    }
-
-    /**
-     * Customer's method. Retrieves customer's state.
-     *
-     * @return customer's state
-     */
-    private CustomerState getCustomerState() {
-        return this.state;
-    }
-
-    /**
-     * Customer's method. Retrieves customer's id.
-     *
-     * @return customer's id
-     */
-    public int getCustomerId() {
-        return this.id;
-    }
-
-    /**
-     * Method used for log. Retrieves the current car, replacement car or no car
-     * of a customer
-     *
-     * @return a String representing the current car of a customer
-     */
-    public String getCustomerVehicle() {
-        /*if (!haveReplacementCar && !haveCar) {
-            return "--";
-        } else if (!haveReplacementCar) {
-            if (id < 10) {
-                return "0" + Integer.toString(id);
-            } else {
-                return Integer.toString(id);
-            }
-        } else {
-            return "R" + Integer.toString(replacementCar);
-        }*/
-        return "";
-    }
-
-    /**
-     * Method used for log. Retrieves if the customer requires a replacement
-     * car.
-     *
-     * @return a String representing if the customer requires a replacement car
-     * or not
-     */
-    public String requiresReplacementCar() {
-        if (requiresCar) {
-            return "T";
-        } else {
-            return "F";
-        }
-    }
-
-    /**
-     * Method used for log. Retrieves if the customer's vehicle has already been
-     * repaired.
-     *
-     * @return a String that represents if a car has already been repaired
-     */
-    public String vehicleRepaired() {
-        if (carRepaired) {
-            return "T";
-        } else {
-            return "F";
-        }
     }
 }

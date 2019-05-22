@@ -45,11 +45,16 @@ public class Repository {
     private String[] managerNotified = new String[N_TYPE_PIECES];
     
     private int[] boughtPieces = new int[N_TYPE_PIECES];
+	
+	private final int rmiRegPortNumb;
+	private final String rmiRegHostName;
     
     /**
      * Repository constructor. Creates the log file and initializes data.
+	 * @param rmiRegHostName
+	 * @param rmiRegPortNumb
      */
-    public Repository() {
+    public Repository(String rmiRegHostName, int rmiRegPortNumb) {
         if(FileOp.exists(".", file_name)) {
             FileOp.deleteFile(".", file_name);
         }
@@ -67,7 +72,10 @@ public class Repository {
         Arrays.fill(piecesStock, 10);
         Arrays.fill(piecesRequired, 0);
         Arrays.fill(managerNotified, "F");
-        Arrays.fill(boughtPieces, 0);        
+        Arrays.fill(boughtPieces, 0);       
+		
+		this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegPortNumb = rmiRegPortNumb;
     }
     
     /**

@@ -1,14 +1,15 @@
 package entities.Mechanic;
 
 import entities.Mechanic.States.MechanicState;
+import interfaces.LoungeInterface;
+import interfaces.OutsideWorldInterface;
+import interfaces.ParkInterface;
+import interfaces.RepairAreaInterface;
+import interfaces.RepositoryInterface;
+import interfaces.SupplierSiteInterface;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import settings.Piece;
-import static communication.ChannelPorts.*;
-import communication.ChannelClient;
-import messages.LoungeMessage.LoungeMessage;
-import messages.ParkMessage.ParkMessage;
-import messages.RepairAreaMessage.RepairAreaMessage;
-
 /**
  *
  * @author André Oliveira
@@ -19,10 +20,6 @@ public class Mechanic extends Thread {
     private MechanicState state;
     private final int id;
 
-    private ChannelClient cc_repairarea;
-    private ChannelClient cc_lounge;
-    private ChannelClient cc_park;
-
     HashMap<Integer, Piece> piecesToBeRepaired;
     private boolean noMoreWork = false;
     boolean repairConcluded = false;
@@ -30,127 +27,143 @@ public class Mechanic extends Thread {
     Piece pieceManagerReStock;
     int idCarToFix = 0;
 
+	
+	private final LoungeInterface loungeInt;
+	private final OutsideWorldInterface outsideWorldInt;
+	private final SupplierSiteInterface supplierSiteInt;
+	private final RepairAreaInterface repairAreaInt;
+	private final ParkInterface parkInt;
+	private final RepositoryInterface repositoryInt;
+	
     /**
      * Instantiates a mechanic.
      * @param i is the mechanic id.
+	 * @param loungeInt
+	 * @param outsideWorldInt
+	 * @param supplierSiteInt
+	 * @param repairAreaInt
+	 * @param parkInt
+	 * @param repositoryInt
      */
-    public Mechanic(int i) {
+    public Mechanic(int i, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
         this.id = i;
-        this.cc_repairarea = new ChannelClient(NAME_REPAIR_AREA, PORT_REPAIR_AREA);
-        this.cc_park = new ChannelClient(NAME_PARK, PORT_PARK);
-        this.cc_lounge = new ChannelClient(NAME_LOUNGE, PORT_LOUNGE);
+		this.loungeInt = loungeInt;
+		this.outsideWorldInt = outsideWorldInt;
+		this.supplierSiteInt = supplierSiteInt;
+		this.repairAreaInt = repairAreaInt;
+		this.parkInt = parkInt;
+		this.repositoryInt = repositoryInt;
     }
 
-    private void openChannel(ChannelClient cc, String name) {
-        while (!cc.open()) {
-            System.out.println(name + " not open.");
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
 
-            }
+    private boolean readThePaper() { //CHECK AGAIN IF IT'S RIGHT FUNCTION WITH "id" INPUT
+        boolean temp = false;
+        try { 
+            temp = repairAreaInt.readThePaper(id);
         }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
-    private boolean readThePaper() {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.READ_THE_PAPER, this.id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-        return response.getBoolResponse();
-    }
-
-    private boolean partAvailable(Piece piece) {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.PART_AVAILABLE, this.id, piece));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-        return response.getBoolResponse();
+    private boolean partAvailable(Piece piece) { //CHECK AGAIN IF IT'S RIGHT FUNCTION WITH "id" INPUT
+        boolean temp = false;
+        try { 
+            temp = repairAreaInt.partAvailable(piece, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private int startRepairProcedure() {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.START_REPAIR_PROCEDURE, this.id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-        return response.getId();
+        int temp = 0;
+        try { 
+            temp = repairAreaInt.startRepairProcedure();
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private void getVehicle(int car) {
-        ParkMessage response;
-        openChannel(cc_park, "Mechanic " + this.id + " : Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.GET_VEHICLE, this.id, car));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
+        try { 
+            parkInt.getVehicle(car, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private HashMap<Integer, Piece> getPiecesToBeRepaired() {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.GET_PIECES_TO_BE_REPAIRED, this.id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-        return response.getHashResponse();
+        HashMap<Integer, Piece> temp = null;
+        try { 
+            temp = repairAreaInt.getPiecesToBeRepaired();
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private void getRequiredPart(int car) {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.GET_REQUIRED_PART, this.id, car));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
+        try { 
+            repairAreaInt.getRequiredPart(car);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private int fixIt(int car, Piece piece) {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.FIX_IT, this.id, piece, car));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-        return response.getId();
+        int temp = -1;
+        try { 
+            temp = repairAreaInt.fixIt(car, piece);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        return temp;
     }
 
     private void returnVehicle(int car) {
-        ParkMessage response;
-        openChannel(cc_park, "Mechanic " + this.id + " : Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.RETURN_VEHICLE, this.id, car));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
-    }
-
-    private void repairConcluded() {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.REPAIR_CONCLUDED, this.id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
+        try { 
+            parkInt.returnVehicle(car);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void alertManager(Piece piece, int cust_id) {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Mechanic " + this.id + " : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.ALERT_MANAGER, this.id, piece, cust_id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try { 
+			loungeInt.alertManager(piece, cust_id, id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void letManagerKnow(Piece piece, int car_id) {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.LET_MANAGER_KNOW, this.id, piece, car_id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-    }
-
-    private void resumeRepairProcedure() {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Mechanic " + this.id + " : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.RESUME_REPAIR_PROCEDURE, this.id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
+        try { 
+            repairAreaInt.letManagerKnow(piece, car_id);
+        }
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     @Override

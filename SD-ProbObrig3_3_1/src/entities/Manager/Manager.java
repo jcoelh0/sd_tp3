@@ -1,16 +1,15 @@
 package entities.Manager;
 
 import entities.Manager.States.ManagerState;
+import interfaces.LoungeInterface;
+import interfaces.OutsideWorldInterface;
+import interfaces.ParkInterface;
+import interfaces.RepairAreaInterface;
+import interfaces.RepositoryInterface;
+import interfaces.SupplierSiteInterface;
+import java.rmi.RemoteException;
 import settings.Piece;
-import messages.LoungeMessage.LoungeMessage;
-import messages.OutsideWorldMessage.OutsideWorldMessage;
-import messages.ParkMessage.ParkMessage;
-import messages.RepairAreaMessage.RepairAreaMessage;
-import messages.SupplierSiteMessage.SupplierSiteMessage;
-
-import static communication.ChannelPorts.*;
-import communication.ChannelClient;
-import messages.RepositoryMessage.RepositoryMessage;
+import shared.OutsideWorld.OutsideWorld;
 
 /**
  *
@@ -29,232 +28,248 @@ public class Manager extends Thread {
     private boolean availableReplacementCar = false;
     private int idCustomer = 0;
     private int idToCall = 0;
-
-    private ChannelClient cc_outsideworld;
-    private ChannelClient cc_park;
-    private ChannelClient cc_lounge;
-    private ChannelClient cc_repairarea;
-    private ChannelClient cc_suppliersite;
-    private ChannelClient cc_repository;
+	
+	String rmiRegHostName;
+    int rmiRegPortNumb;
+	private final LoungeInterface loungeInt;
+	private final OutsideWorldInterface outsideWorldInt;
+	private final SupplierSiteInterface supplierSiteInt;
+	private final RepairAreaInterface repairAreaInt;
+	private final ParkInterface parkInt;
+	private final RepositoryInterface repositoryInt;
 
     /**
      * Instantiates the manager.
      * @param nCustomers number of customers.
+	 * @param loungeInt
+	 * @param outsideWorldInt
+	 * @param supplierSiteInt
+	 * @param repairAreaInt
+	 * @param parkInt
+	 * @param repositoryInt
      */
-    public Manager(int nCustomers) {
+    public Manager(int nCustomers, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
         this.nCustomers = nCustomers;
-        this.cc_outsideworld = new ChannelClient(NAME_OUTSIDE_WORLD, PORT_OUTSIDE_WORLD);
-        this.cc_park = new ChannelClient(NAME_PARK, PORT_PARK);
-        this.cc_lounge = new ChannelClient(NAME_LOUNGE, PORT_LOUNGE);
-        this.cc_repairarea = new ChannelClient(NAME_REPAIR_AREA, PORT_REPAIR_AREA);
-        this.cc_suppliersite = new ChannelClient(NAME_SUPPLIER_SITE, PORT_SUPPLIER_SITE);
-        this.cc_repository = new ChannelClient(NAME_GENERAL_REPOSITORY, PORT_GENERAL_REPOSITORY);
+		this.loungeInt = loungeInt;
+		this.outsideWorldInt = outsideWorldInt;
+		this.supplierSiteInt = supplierSiteInt;
+		this.repairAreaInt = repairAreaInt;
+		this.parkInt = parkInt;
+		this.repositoryInt = repositoryInt;
+        
     }
 
-    private void openChannel(ChannelClient cc, String name) {
-        while (!cc.open()) {
-            System.out.println(name + " not open.");
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
 
-            }
+    private void checkWhatToDo() {
+        try {
+            loungeInt.checkWhatToDo();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
         }
     }
 
-    private void checkWhatToDo() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.CHECK_WHAT_TO_DO));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-    }
-
     private void enoughWork() {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Manager : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.ENOUGH_WORK));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
+        try {
+			repairAreaInt.enoughWork();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void getNextTask() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.GET_NEXT_TASK));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try {
+			loungeInt.getNextTask();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private int appraiseSit() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.APPRAISE_SIT));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getCustId();
+		int temp = 0;
+		try {
+			temp = loungeInt.appraiseSit();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private int currentCustomer() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.CURRENT_CUSTOMER));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getCustId();
+        int temp = 0;
+		try {
+			temp = loungeInt.currentCustomer();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private String talkWithCustomer() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.TALK_WITH_CUSTOMER));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getStrResponse();
+        String temp = "";
+		try {
+			temp = loungeInt.talkWithCustomer();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private boolean replacementCarAvailable(int cust_id) {
-        ParkMessage response;
-        openChannel(cc_park, "Manager : Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.REPLACEMENT_CAR_AVAILABLE, cust_id));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
-        return response.getBoolResponse();
+        boolean temp = false;
+		try {
+			temp = parkInt.replacementCarAvailable(cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private int reserveCar(int cust_id) {
-        ParkMessage response;
-        openChannel(cc_park, "Manager : Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.RESERVE_CAR, cust_id));
-        response = (ParkMessage) cc_park.readObject();
-        cc_park.close();
-        return response.getId();
+       int temp = 0;
+		try {
+			temp = parkInt.reserveCar(cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private void handCarKey(int car_id, int cust_id) {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.HAND_CAR_KEY, car_id, cust_id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try {
+			loungeInt.handCarKey(car_id, cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void addToReplacementQueue(int cust_id) {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.ADD_TO_REPLACEMENT_QUEUE, cust_id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try {
+			loungeInt.addToReplacementQueue(cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void receivePayment() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.RECEIVE_PAYMENT));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try {
+			loungeInt.receivePayment();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private Piece getPieceToReStock() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.GET_PIECE_TO_RESTOCK));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getPieceResponse();
+        Piece temp = null;
+		try {
+			temp = loungeInt.getPieceToReStock();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private void registerService(int cust_id) {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Manager : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.REGISTER_SERVICE, cust_id));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
+        try {
+			repairAreaInt.registerService(cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private int getIdToCall() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.GET_ID_TO_CALL));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getCustId();
+        int temp = 0;
+		try {
+			temp = loungeInt.getIdToCall();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private boolean alertCustomer(int cust_id) {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.ALERT_CUSTOMER, cust_id));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
-        return response.getBoolResponse();
+        boolean temp = false;
+		try {
+			temp = loungeInt.alertCustomer(cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private void phoneCustomer(int cust_id) {
-        OutsideWorldMessage response;
-        openChannel(cc_outsideworld, "Manager : OutsideWorld");
-        cc_outsideworld.writeObject(new OutsideWorldMessage(OutsideWorldMessage.PHONE_CUSTOMER, cust_id));
-        response = (OutsideWorldMessage) cc_outsideworld.readObject();
-        cc_outsideworld.close();
+        try {
+			outsideWorldInt.phoneCustomer(cust_id);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private void goReplenishStock() {
-        LoungeMessage response;
-        openChannel(cc_lounge, "Manager : Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.GO_REPLENISH_STOCK));
-        response = (LoungeMessage) cc_lounge.readObject();
-        cc_lounge.close();
+        try {
+			loungeInt.goReplenishStock();
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
 
     private int goToSupplier(Piece partNeeded) {
-        SupplierSiteMessage response;
-        openChannel(cc_suppliersite, "Manager : SupplierSite");
-        cc_suppliersite.writeObject(new SupplierSiteMessage(SupplierSiteMessage.GO_TO_SUPPLIER, partNeeded));
-        response = (SupplierSiteMessage) cc_suppliersite.readObject();
-        cc_suppliersite.close();
-        return response.getIntResponse();
+        int temp = 0;
+		try {
+			temp = supplierSiteInt.goToSupplier(partNeeded);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
 
     private int storePart(Piece partNeeded, int quant) {
-        RepairAreaMessage response;
-        openChannel(cc_repairarea, "Manager : RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.STORE_PART, partNeeded, quant));
-        response = (RepairAreaMessage) cc_repairarea.readObject();
-        cc_repairarea.close();
-        return response.getId();
+        int temp = 0;
+		try {
+			temp = repairAreaInt.storePart(partNeeded, quant);
+        } 
+        catch (RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
+            System.exit(1);
+        }
+		return temp;
     }
     
-    private void endProgram() {
-        openChannel(cc_lounge, "Lounge");
-        cc_lounge.writeObject(new LoungeMessage(LoungeMessage.END));
-        cc_lounge.readObject();
-        cc_lounge.close();
-        
-        openChannel(cc_repairarea, "RepairArea");
-        cc_repairarea.writeObject(new RepairAreaMessage(RepairAreaMessage.END));
-        cc_repairarea.readObject();
-        cc_repairarea.close();
-        
-        openChannel(cc_park, "Park");
-        cc_park.writeObject(new ParkMessage(ParkMessage.END));
-        cc_park.readObject();
-        cc_park.close();
-        
-        openChannel(cc_outsideworld, "OutsideWorld");
-        cc_outsideworld.writeObject(new OutsideWorldMessage(OutsideWorldMessage.END));
-        cc_outsideworld.readObject();
-        cc_outsideworld.close();
-        
-        openChannel(cc_suppliersite, "SupplierSite");
-        cc_suppliersite.writeObject(new SupplierSiteMessage(SupplierSiteMessage.END));
-        cc_suppliersite.readObject();
-        cc_suppliersite.close();
-        
-        openChannel(cc_repository, "Repository");
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.END));
-        cc_repository.readObject();
-        cc_repository.close();
-    }
 
     @Override
     public void run() {
@@ -267,7 +282,6 @@ public class Manager extends Thread {
                     if (leftCustomers == nCustomers) {
                         enoughWork();
                         noMoreTasks = true;
-                        endProgram();
                         break;
                     }
                     getNextTask();

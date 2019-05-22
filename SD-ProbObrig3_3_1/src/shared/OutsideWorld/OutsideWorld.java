@@ -41,7 +41,7 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
         
         this.repositoryInterface = repository;
         this.rmiRegHostName = rmiRegHostName;
-        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegPortNumb = rmiRegPortNumb;
     }
     
     /**

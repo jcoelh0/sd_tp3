@@ -67,7 +67,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
         
         this.repositoryInterface = repository;
         this.rmiRegHostName = rmiRegHostName;
-        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegPortNumb = rmiRegPortNumb;
         
         //updateStock(stock);
     }
