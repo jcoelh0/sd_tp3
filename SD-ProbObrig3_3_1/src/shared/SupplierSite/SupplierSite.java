@@ -2,6 +2,7 @@ package shared.SupplierSite;
 
 import entities.Manager.Interfaces.IManagerSS;
 import interfaces.RepositoryInterface;
+import java.rmi.RemoteException;
 import settings.Piece;
 import settings.Constants;
 
@@ -46,7 +47,7 @@ public class SupplierSite implements IManagerSS {
         System.out.println("Manager - Bought " + randomNum + " of " + partNeeded);
         this.partNeeded = partNeeded;
         piecesBought[partNeeded.getTypePiece().ordinal()] += randomNum;
-        //updatePiecesBought(piecesBought);
+        updatePiecesBought(piecesBought);
         return randomNum;
     }
 
@@ -61,24 +62,13 @@ public class SupplierSite implements IManagerSS {
         return piecesBought;
     }
     
-    /*
     private synchronized void updatePiecesBought(int[] piecesBought) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_PARTS_PURCHASED, piecesBought));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
-    }
-    
-    private void startCommunication(ChannelClient cc) {
-        while(!cc.open()) {
-            try {
-                Thread.sleep(1000);
-            }
-            catch(Exception e) {
-                
-            }
+        try {
+            repositoryInterface.setBoughtPieces(piecesBought);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
         }
     }
-*/
 }

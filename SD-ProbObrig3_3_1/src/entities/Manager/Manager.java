@@ -5,11 +5,9 @@ import interfaces.LoungeInterface;
 import interfaces.OutsideWorldInterface;
 import interfaces.ParkInterface;
 import interfaces.RepairAreaInterface;
-import interfaces.RepositoryInterface;
 import interfaces.SupplierSiteInterface;
 import java.rmi.RemoteException;
 import settings.Piece;
-import shared.OutsideWorld.OutsideWorld;
 
 /**
  *
@@ -28,43 +26,39 @@ public class Manager extends Thread {
     private boolean availableReplacementCar = false;
     private int idCustomer = 0;
     private int idToCall = 0;
-	
-	String rmiRegHostName;
+
+    String rmiRegHostName;
     int rmiRegPortNumb;
-	private final LoungeInterface loungeInt;
-	private final OutsideWorldInterface outsideWorldInt;
-	private final SupplierSiteInterface supplierSiteInt;
-	private final RepairAreaInterface repairAreaInt;
-	private final ParkInterface parkInt;
-	private final RepositoryInterface repositoryInt;
+    private final LoungeInterface loungeInt;
+    private final OutsideWorldInterface outsideWorldInt;
+    private final SupplierSiteInterface supplierSiteInt;
+    private final RepairAreaInterface repairAreaInt;
+    private final ParkInterface parkInt;
 
     /**
      * Instantiates the manager.
+     *
      * @param nCustomers number of customers.
-	 * @param loungeInt
-	 * @param outsideWorldInt
-	 * @param supplierSiteInt
-	 * @param repairAreaInt
-	 * @param parkInt
-	 * @param repositoryInt
+     * @param loungeInt
+     * @param outsideWorldInt
+     * @param supplierSiteInt
+     * @param repairAreaInt
+     * @param parkInt
      */
-    public Manager(int nCustomers, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
+    public Manager(int nCustomers, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt) {
         this.nCustomers = nCustomers;
-		this.loungeInt = loungeInt;
-		this.outsideWorldInt = outsideWorldInt;
-		this.supplierSiteInt = supplierSiteInt;
-		this.repairAreaInt = repairAreaInt;
-		this.parkInt = parkInt;
-		this.repositoryInt = repositoryInt;
-        
-    }
+        this.loungeInt = loungeInt;
+        this.outsideWorldInt = outsideWorldInt;
+        this.supplierSiteInt = supplierSiteInt;
+        this.repairAreaInt = repairAreaInt;
+        this.parkInt = parkInt;
 
+    }
 
     private void checkWhatToDo() {
         try {
             loungeInt.checkWhatToDo();
-        } 
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -72,9 +66,8 @@ public class Manager extends Thread {
 
     private void enoughWork() {
         try {
-			repairAreaInt.enoughWork();
-        } 
-        catch (RemoteException e) {
+            repairAreaInt.enoughWork();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -82,79 +75,72 @@ public class Manager extends Thread {
 
     private void getNextTask() {
         try {
-			loungeInt.getNextTask();
-        } 
-        catch (RemoteException e) {
+            loungeInt.getNextTask();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
     }
 
     private int appraiseSit() {
-		int temp = 0;
-		try {
-			temp = loungeInt.appraiseSit();
-        } 
-        catch (RemoteException e) {
+        int temp = 0;
+        try {
+            temp = loungeInt.appraiseSit();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private int currentCustomer() {
         int temp = 0;
-		try {
-			temp = loungeInt.currentCustomer();
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = loungeInt.currentCustomer();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private String talkWithCustomer() {
         String temp = "";
-		try {
-			temp = loungeInt.talkWithCustomer();
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = loungeInt.talkWithCustomer();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private boolean replacementCarAvailable(int cust_id) {
         boolean temp = false;
-		try {
-			temp = parkInt.replacementCarAvailable(cust_id);
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = parkInt.replacementCarAvailable(cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private int reserveCar(int cust_id) {
-       int temp = 0;
-		try {
-			temp = parkInt.reserveCar(cust_id);
-        } 
-        catch (RemoteException e) {
+        int temp = 0;
+        try {
+            temp = parkInt.reserveCar(cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private void handCarKey(int car_id, int cust_id) {
         try {
-			loungeInt.handCarKey(car_id, cust_id);
-        } 
-        catch (RemoteException e) {
+            loungeInt.handCarKey(car_id, cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -162,9 +148,8 @@ public class Manager extends Thread {
 
     private void addToReplacementQueue(int cust_id) {
         try {
-			loungeInt.addToReplacementQueue(cust_id);
-        } 
-        catch (RemoteException e) {
+            loungeInt.addToReplacementQueue(cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -172,9 +157,8 @@ public class Manager extends Thread {
 
     private void receivePayment() {
         try {
-			loungeInt.receivePayment();
-        } 
-        catch (RemoteException e) {
+            loungeInt.receivePayment();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -182,21 +166,19 @@ public class Manager extends Thread {
 
     private Piece getPieceToReStock() {
         Piece temp = null;
-		try {
-			temp = loungeInt.getPieceToReStock();
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = loungeInt.getPieceToReStock();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private void registerService(int cust_id) {
         try {
-			repairAreaInt.registerService(cust_id);
-        } 
-        catch (RemoteException e) {
+            repairAreaInt.registerService(cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -204,33 +186,30 @@ public class Manager extends Thread {
 
     private int getIdToCall() {
         int temp = 0;
-		try {
-			temp = loungeInt.getIdToCall();
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = loungeInt.getIdToCall();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private boolean alertCustomer(int cust_id) {
         boolean temp = false;
-		try {
-			temp = loungeInt.alertCustomer(cust_id);
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = loungeInt.alertCustomer(cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private void phoneCustomer(int cust_id) {
         try {
-			outsideWorldInt.phoneCustomer(cust_id);
-        } 
-        catch (RemoteException e) {
+            outsideWorldInt.phoneCustomer(cust_id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -238,9 +217,8 @@ public class Manager extends Thread {
 
     private void goReplenishStock() {
         try {
-			loungeInt.goReplenishStock();
-        } 
-        catch (RemoteException e) {
+            loungeInt.goReplenishStock();
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -248,28 +226,25 @@ public class Manager extends Thread {
 
     private int goToSupplier(Piece partNeeded) {
         int temp = 0;
-		try {
-			temp = supplierSiteInt.goToSupplier(partNeeded);
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = supplierSiteInt.goToSupplier(partNeeded);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
 
     private int storePart(Piece partNeeded, int quant) {
         int temp = 0;
-		try {
-			temp = repairAreaInt.storePart(partNeeded, quant);
-        } 
-        catch (RemoteException e) {
+        try {
+            temp = repairAreaInt.storePart(partNeeded, quant);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
-		return temp;
+        return temp;
     }
-    
 
     @Override
     public void run() {

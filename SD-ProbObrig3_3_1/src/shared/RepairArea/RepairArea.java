@@ -6,6 +6,7 @@ import entities.Manager.Interfaces.IManagerRA;
 import entities.Manager.States.ManagerState;
 import entities.Mechanic.States.MechanicState;
 import interfaces.RepositoryInterface;
+import java.rmi.RemoteException;
 import settings.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +70,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
         this.rmiRegHostName = rmiRegHostName;
         this.rmiRegPortNumb = rmiRegPortNumb;
         
-        //updateStock(stock);
+        updateStock(stock);
     }
 
     /**
@@ -88,12 +89,12 @@ public class RepairArea implements IMechanicRA, IManagerRA {
 
     private void removePieceFromStock(Piece p) {
         stock.put(p.getTypePiece(), stock.get(p.getTypePiece()) - 1);
-        //updateStock(stock);
+        updateStock(stock);
     }
 
     private void addPieceToStock(Piece p) {
         stock.put(p.getTypePiece(), stock.get(p.getTypePiece()) + 1);
-        //updateStock(stock);
+        updateStock(stock);
     }
 
     /**
@@ -105,7 +106,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
      */
     @Override
     public synchronized boolean readThePaper(int idMechanic) {
-        //setMechanicState(MechanicState.WAITING_FOR_WORK, idMechanic);
+        setMechanicState(MechanicState.WAITING_FOR_WORK, idMechanic);
         int id = idMechanic;
         mechanicsQueue.add(id);
         while (readyToRepair.isEmpty() && carsToRepair.isEmpty() && !enoughWork) {
@@ -156,8 +157,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
         repaired.add(id);
         removePieceFromStock(piece);
         piecesToBeRepaired.remove(id, piece);
-        //updateStock(stock);
-        //updatePiecesToBeRepaired(piecesToBeRepaired);
+        updateStock(stock);
         return 1;
     }
 
@@ -169,7 +169,6 @@ public class RepairArea implements IMechanicRA, IManagerRA {
     @Override
     public synchronized void getRequiredPart(int id) {
         piecesToBeRepaired.put(id, new Piece());
-        //updatePiecesToBeRepaired(piecesToBeRepaired);
     }
 
     /**
@@ -207,7 +206,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
         else if(piece.toString().equals("Brakes"))
             brakesQueue.add(idCustomerNeedsPiece);
         
-        //updatePartsMissing(flag);
+        updatePartsMissing(flag);
         carsWaitingForPieces.put(idCustomerNeedsPiece, piece);
         carsToRepair.remove(idCustomerNeedsPiece);
     }
@@ -220,7 +219,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
      */
     @Override
     public synchronized void registerService(int idCustomer) {
-        //setManagerState(ManagerState.POSTING_JOB);
+        setManagerState(ManagerState.POSTING_JOB);
         System.out.println("Manager - Customer " + idCustomer + " needs car repaired.");
         if (!alreadyAdded.contains(idCustomer)) {
             carsToRepair.add(idCustomer);
@@ -230,7 +229,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
             notify();
         }
         nRequestsManager++;
-        //updateRequests(nRequestsManager);
+        updateRequests(nRequestsManager);
     }
 
     /**
@@ -272,7 +271,7 @@ public class RepairArea implements IMechanicRA, IManagerRA {
         carsWaitingForPieces.remove(n);
         flagPartMissing[part.getIdTypePiece()] = false;
         flag[part.getIdTypePiece()] = "F";
-        //updatePartsMissing(flag);
+        updatePartsMissing(flag);
         notifyAll();
         return n;
     }
@@ -316,64 +315,53 @@ public class RepairArea implements IMechanicRA, IManagerRA {
         notifyAll();
     }
     
-    /*
     private synchronized void setMechanicState(MechanicState state, int id) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_MECHANIC_STATE, state.toString(), id));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
+        try {
+            repositoryInterface.setMechanicState(state.toString(), id);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void setManagerState(ManagerState state) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_MANAGER_STATE, state.toString()));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
+        try {
+            repositoryInterface.setManagerState(state.toString());
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateStock(HashMap<EnumPiece,Integer> stock) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_PARTS, stock));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
+        try {
+            repositoryInterface.setPiecesStock(stock);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateRequests(int n) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_SERVICES, n));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
+        try {
+            repositoryInterface.setRequests(n);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updatePartsMissing(String[] flag) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.PART_NEEDED, flag));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
-    }
-    
-    private synchronized void updatePiecesToBeRepaired(HashMap<Integer,Piece> piecesToBeRepaired) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(piecesToBeRepaired, RepositoryMessage.NUMBER_VEHICLES_WAITING));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
-    }
-    
-    private void startCommunication(ChannelClient cc) {
-        while(!cc.open()) {
-            try {
-                Thread.sleep(1000);
-            }
-            catch(Exception e) {
-                
-            }
+        try {
+            repositoryInterface.setManagerNotifed(flag);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
         }
     }
-    */
 }

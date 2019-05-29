@@ -6,6 +6,7 @@ import entities.Customer.Interfaces.ICustomerP;
 import entities.Customer.States.CustomerState;
 import entities.Mechanic.States.MechanicState;
 import interfaces.RepositoryInterface;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -42,7 +43,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
             replacementCars.add(i);
         }
         numrepcars = nReplacementCars;
-        //updateNumRepCars(numrepcars);
+        updateNumRepCars(numrepcars);
         
         this.repositoryInterface = repository;
         this.rmiRegHostName = rmiRegHostName;
@@ -57,11 +58,11 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
      */
     @Override
     public synchronized void parkCar(int id) {
-        //setCustomerState(CustomerState.PARK, id);
+        setCustomerState(CustomerState.PARK, id);
         carsParked.add(id);
         parkingSlots--;
         numcars++;
-        //updateNumCars(numcars);        
+        updateNumCars(numcars);        
     }
 
     /**
@@ -73,10 +74,10 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
      */
     @Override
     public synchronized void findCar(int id, int replacementCarId) {
-        //setCustomerState(CustomerState.PARK, id);
+        setCustomerState(CustomerState.PARK, id);
         replacementCars.remove(replacementCarId);
         numrepcars--;
-        //updateNumRepCars(numrepcars);
+        updateNumRepCars(numrepcars);
     }
 
     /**
@@ -88,11 +89,11 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
      */
     @Override
     public synchronized void getVehicle(int idCar, int idMechanic) {
-        //setMechanicState(MechanicState.FIXING_CAR, idMechanic);
+        setMechanicState(MechanicState.FIXING_CAR, idMechanic);
         carsParked.remove(new Integer(idCar));
         parkingSlots++;
         numcars--;
-        //updateNumCars(numcars);
+        updateNumCars(numcars);
     }
 
     /**
@@ -106,7 +107,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
     public synchronized void returnReplacementCar(int idCar, int idCustomer) {
         replacementCars.add(idCar);
         numrepcars++;
-        //updateNumRepCars(numrepcars);
+        updateNumRepCars(numrepcars);
     }
 
     /**
@@ -120,7 +121,7 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
         carsParked.add(id);
         parkingSlots--;
         numcars++;
-        //updateNumCars(numcars);
+        updateNumCars(numcars);
     }
 
     /**
@@ -169,48 +170,43 @@ public class Park implements ICustomerP, IMechanicP, IManagerP {
     public synchronized void waitForCustomer(int id) {
     }
     
-    /*
     private synchronized void setCustomerState(CustomerState state, int id) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_CUSTOMER_STATE, state.toString(), id));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setCustomerState(state.toString(), id);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void setMechanicState(MechanicState state, int id) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_MECHANIC_STATE, state.toString(), id));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setMechanicState(state.toString(), id);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateNumCars(int numcars) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_NONREPCARS_PARKED, numcars));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setCustomersParked(numcars);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateNumRepCars(int numrepcars) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_REPCARS_PARKED, numrepcars));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
-    }
-    
-    private void startCommunication(ChannelClient cc) {
-        while(!cc.open()) {
-            try {
-                Thread.sleep(1000);
-            }
-            catch(Exception e) {
-                
-            }
+        try {
+            repositoryInterface.setReplacementParked(numrepcars);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
         }
     }
-    */
 }

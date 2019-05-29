@@ -4,6 +4,7 @@ import entities.Manager.Interfaces.IManagerOW;
 import entities.Customer.Interfaces.ICustomerOW;
 import entities.Customer.States.CustomerState;
 import interfaces.RepositoryInterface;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -54,7 +55,7 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
      */
     @Override
     public synchronized boolean decideOnRepair(int id) {
-        //setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
+        setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
         Random requires = new Random();
         Random n = new Random();
         int randomNum = 0;
@@ -63,10 +64,10 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
         }
         boolean req = requires.nextBoolean();
         if(req == true) {
-            //updateRequiresCar("T", id);
+            updateRequiresCar("T", id);
         }
         else {
-            //updateRequiresCar("F", id);
+            updateRequiresCar("F", id);
         }
         return req;
     }
@@ -81,8 +82,8 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
      */
     @Override
     public synchronized boolean backToWorkByBus(boolean carRepaired, int id) {
-        //setCustomerState(CustomerState.NORMAL_LIFE_WITHOUT_CAR, id);
-        //updateVehicleDriven("--", id);
+        setCustomerState(CustomerState.NORMAL_LIFE_WITHOUT_CAR, id);
+        updateVehicleDriven("--", id);
         vehicleDriven[id] = "--";
         if (!carRepaired) {
             waitingForCar.add(id);
@@ -112,15 +113,15 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
      */
     @Override
     public synchronized boolean backToWorkByCar(boolean carRepaired, int replacementCar, int id) {
-        //setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
+        setCustomerState(CustomerState.NORMAL_LIFE_WITH_CAR, id);
         if (replacementCar == -1) {
             if (id < 10) {
-                //updateVehicleDriven("0"+Integer.toString(id), id);
+                updateVehicleDriven("0"+Integer.toString(id), id);
             } else {
-                //updateVehicleDriven(Integer.toString(id), id);
+                updateVehicleDriven(Integer.toString(id), id);
             }
         } else {
-            //updateVehicleDriven("R" + Integer.toString(replacementCar), id);
+            updateVehicleDriven("R" + Integer.toString(replacementCar), id);
         }
         if (!carRepaired) {
             waitingForCar.add(id);
@@ -132,11 +133,11 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
 
                 }
             }
-            //updateVehicleDriven("--", id);
+            updateVehicleDriven("--", id);
             return true;
         }
         else {
-            //updateRepairedCar("T", id);
+            updateRepairedCar("T", id);
         }
         return true;
     }
@@ -168,48 +169,43 @@ public class OutsideWorld implements ICustomerOW, IManagerOW {
         }
     }
     
-    /*
     private synchronized void setCustomerState(CustomerState state, int id) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_CUSTOMER_STATE, state.toString(), id));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setCustomerState(state.toString(), id);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateVehicleDriven(String s, int i) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.VEHICLE_DRIVEN, s, i));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setVehicleDriven(s, i);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateRequiresCar(String s, int i) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.REQUIRES_CAR, s, i));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
+        try {
+            repositoryInterface.setRequiresCar(s, i);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateRepairedCar(String s, int i) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.REPAIRED_CAR, s, i));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
-    }
-    
-    private void startCommunication(ChannelClient cc) {
-        while(!cc.open()) {
-            try {
-                Thread.sleep(1000);
-            }
-            catch(Exception e) {
-                
-            }
+        try {
+            repositoryInterface.setVehicleRepaired(s, i);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
         }
     }
-*/
 }

@@ -2,14 +2,13 @@ package entities.Mechanic;
 
 import entities.Mechanic.States.MechanicState;
 import interfaces.LoungeInterface;
-import interfaces.OutsideWorldInterface;
 import interfaces.ParkInterface;
 import interfaces.RepairAreaInterface;
 import interfaces.RepositoryInterface;
-import interfaces.SupplierSiteInterface;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import settings.Piece;
+
 /**
  *
  * @author André Oliveira
@@ -27,41 +26,33 @@ public class Mechanic extends Thread {
     Piece pieceManagerReStock;
     int idCarToFix = 0;
 
-	
-	private final LoungeInterface loungeInt;
-	private final OutsideWorldInterface outsideWorldInt;
-	private final SupplierSiteInterface supplierSiteInt;
-	private final RepairAreaInterface repairAreaInt;
-	private final ParkInterface parkInt;
-	private final RepositoryInterface repositoryInt;
-	
+    private final LoungeInterface loungeInt;
+    private final RepairAreaInterface repairAreaInt;
+    private final ParkInterface parkInt;
+    private final RepositoryInterface repositoryInt;
+
     /**
      * Instantiates a mechanic.
+     *
      * @param i is the mechanic id.
-	 * @param loungeInt
-	 * @param outsideWorldInt
-	 * @param supplierSiteInt
-	 * @param repairAreaInt
-	 * @param parkInt
-	 * @param repositoryInt
+     * @param loungeInt
+     * @param repairAreaInt
+     * @param parkInt
+     * @param repositoryInt
      */
-    public Mechanic(int i, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
+    public Mechanic(int i, LoungeInterface loungeInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
         this.id = i;
-		this.loungeInt = loungeInt;
-		this.outsideWorldInt = outsideWorldInt;
-		this.supplierSiteInt = supplierSiteInt;
-		this.repairAreaInt = repairAreaInt;
-		this.parkInt = parkInt;
-		this.repositoryInt = repositoryInt;
+        this.loungeInt = loungeInt;
+        this.repairAreaInt = repairAreaInt;
+        this.parkInt = parkInt;
+        this.repositoryInt = repositoryInt;
     }
-
 
     private boolean readThePaper() { //CHECK AGAIN IF IT'S RIGHT FUNCTION WITH "id" INPUT
         boolean temp = false;
-        try { 
+        try {
             temp = repairAreaInt.readThePaper(id);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -70,10 +61,9 @@ public class Mechanic extends Thread {
 
     private boolean partAvailable(Piece piece) { //CHECK AGAIN IF IT'S RIGHT FUNCTION WITH "id" INPUT
         boolean temp = false;
-        try { 
+        try {
             temp = repairAreaInt.partAvailable(piece, id);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -82,10 +72,9 @@ public class Mechanic extends Thread {
 
     private int startRepairProcedure() {
         int temp = 0;
-        try { 
+        try {
             temp = repairAreaInt.startRepairProcedure();
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -93,10 +82,9 @@ public class Mechanic extends Thread {
     }
 
     private void getVehicle(int car) {
-        try { 
+        try {
             parkInt.getVehicle(car, id);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -104,10 +92,9 @@ public class Mechanic extends Thread {
 
     private HashMap<Integer, Piece> getPiecesToBeRepaired() {
         HashMap<Integer, Piece> temp = null;
-        try { 
+        try {
             temp = repairAreaInt.getPiecesToBeRepaired();
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -115,10 +102,9 @@ public class Mechanic extends Thread {
     }
 
     private void getRequiredPart(int car) {
-        try { 
+        try {
             repairAreaInt.getRequiredPart(car);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -126,10 +112,9 @@ public class Mechanic extends Thread {
 
     private int fixIt(int car, Piece piece) {
         int temp = -1;
-        try { 
+        try {
             temp = repairAreaInt.fixIt(car, piece);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
@@ -137,30 +122,27 @@ public class Mechanic extends Thread {
     }
 
     private void returnVehicle(int car) {
-        try { 
+        try {
             parkInt.returnVehicle(car);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
     }
 
     private void alertManager(Piece piece, int cust_id) {
-        try { 
-			loungeInt.alertManager(piece, cust_id, id);
-        }
-        catch (RemoteException e) {
+        try {
+            loungeInt.alertManager(piece, cust_id, id);
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }
     }
 
     private void letManagerKnow(Piece piece, int car_id) {
-        try { 
+        try {
             repairAreaInt.letManagerKnow(piece, car_id);
-        }
-        catch (RemoteException e) {
+        } catch (RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + getName() + ": " + e.getMessage() + "!");
             System.exit(1);
         }

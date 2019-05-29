@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import settings.Piece;
 import settings.Constants;
+import java.rmi.RemoteException;
 
 /**
  *
@@ -59,9 +60,9 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void queueIn(int id) {
-        //setCustomerState(CustomerState.RECEPTION, id);
+        setCustomerState(CustomerState.RECEPTION, id);
         customersQueue.add(id);
-        //setCustomersQueueSize(customersQueue.size());
+        setCustomersQueueSize(customersQueue.size());
         notifyAll();
         while(customersQueue.contains(id) && !managerAvailable) {
             try {
@@ -187,7 +188,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
         readyToReceive = false;
         payed = true;
         notifyAll();        
-        //setCustomersQueueSize(customersQueue.size());
+        setCustomersQueueSize(customersQueue.size());
     }
 
     /**
@@ -214,7 +215,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized int currentCustomer() {
-        //setManagerState(ManagerState.ATTENDING_CUSTOMER);
+        setManagerState(ManagerState.ATTENDING_CUSTOMER);
         nextCustomer = customersQueue.poll();
         notify();
         return nextCustomer;
@@ -230,9 +231,9 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized boolean collectKey(int id) {
-        //setCustomerState(CustomerState.WAITING_FOR_REPLACE_CAR, id);
+        setCustomerState(CustomerState.WAITING_FOR_REPLACE_CAR, id);
         replacementQueue.add(id);
-        //setReplacementQueueSize(replacementQueue.size());
+        setReplacementQueueSize(replacementQueue.size());
         notifyAll();
         while (!customersWithRepCar.containsKey(id) && !carsRepaired.contains(id)) { //&& !carsRepaired.contains(id)
             try {
@@ -242,7 +243,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
             }
         }
         replacementQueue.remove(id);
-        //setReplacementQueueSize(replacementQueue.size());
+        setReplacementQueueSize(replacementQueue.size());
         if (carsRepaired.contains(id)) {
             carsRepaired.remove(id);
             requiresReplacementCar[id] = false;
@@ -272,7 +273,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void checkWhatToDo() {
-        //setManagerState(ManagerState.CHECKING_WHAT_TO_DO);
+        setManagerState(ManagerState.CHECKING_WHAT_TO_DO);
     }
 
     /**
@@ -283,7 +284,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized int getIdToCall() {
-        //setManagerState(ManagerState.ALERTING_CUSTOMER);
+        setManagerState(ManagerState.ALERTING_CUSTOMER);
         int next = customersToCallQueue.poll();
         return next;
     }
@@ -319,7 +320,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void alertManager(Piece piece, int customerId, int idMechanic) {
-        //setMechanicState(MechanicState.ALERTING_MANAGER, idMechanic);
+        setMechanicState(MechanicState.ALERTING_MANAGER, idMechanic);
         if (piece == null) {
             System.out.println("Mechanic " + idMechanic + " - Customer " + customerId + " car is repaired!");
             customersToCallQueue.add(customerId);
@@ -339,7 +340,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized Piece getPieceToReStock() {
-        //setManagerState(ManagerState.GETTING_NEW_PARTS);
+        setManagerState(ManagerState.GETTING_NEW_PARTS);
         Piece p = piecesQueue.poll();
         return p;
     }
@@ -350,7 +351,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
      */
     @Override
     public synchronized void goReplenishStock() {
-        //setManagerState(ManagerState.REPLENISH_STOCK);
+        setManagerState(ManagerState.REPLENISH_STOCK);
     }
 
     /**
@@ -375,7 +376,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
     @Override
     public synchronized boolean alertCustomer(int id) {
         carsRepaired.add(id);
-        //updateCarsRepaired(carsRepaired.size());
+        updateCarsRepaired(carsRepaired.size());
         if (replacementQueue.contains(id)) {
             customersToCallQueue.remove(id);
             notifyAll();
@@ -415,65 +416,64 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL {
         return carsRepaired.size();
     }
 
-    /*    
+    
     private synchronized void setManagerState(ManagerState state) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_MANAGER_STATE, state.toString()));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close();
+        try {
+            repositoryInterface.setManagerState(state.toString());
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void setCustomerState(CustomerState state, int id) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_CUSTOMER_STATE, state.toString(), id));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setCustomerState(state.toString(), id);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void setMechanicState(MechanicState state, int id) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.SET_MECHANIC_STATE, state.toString(), id));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setMechanicState(state.toString(), id);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void setCustomersQueueSize(int size) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_IN_QUEUE, size));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setCustomersQueue(size);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void setReplacementQueueSize(int size) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.WAITING_REPLACEMENT, size));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
+        try {
+            repositoryInterface.setReplacementQueue(size);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
+        }
     }
     
     private synchronized void updateCarsRepaired(int size) {
-        RepositoryMessage response;
-        startCommunication(cc_repository);
-        cc_repository.writeObject(new RepositoryMessage(RepositoryMessage.NUMBER_CARS_REPAIRED, size));
-        response = (RepositoryMessage) cc_repository.readObject();
-        cc_repository.close(); 
-    }
-    
-    private void startCommunication(ChannelClient cc) {
-        while(!cc.open()) {
-            try {
-                Thread.sleep(1000);
-            }
-            catch(Exception e) {
-                
-            }
+        try {
+            repositoryInterface.setNumCarsRepaired(size);
+        }
+        catch(RemoteException e) {
+            System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
+            System.exit(1);
         }
     }
-    */
-
 }
