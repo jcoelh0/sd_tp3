@@ -25,29 +25,29 @@ public class RegistryConfiguration {
     public static final String RMI_REGISTRY_REPOSITORY_NAME = "Repository";
     
     public static final String NAME_LOUNGE = "l040101-ws02.ua.pt";
-    public static final String RMI_REGISTRY_LOUNGE_NAME = "Stable";
+    public static final String RMI_REGISTRY_LOUNGE_NAME = "Lounge";
     
     public static final String NAME_OUTSIDEWORLD = "l040101-ws03.ua.pt";
-    public static final String RMI_REGISTRY_OUTSIDEWORLD_NAME = "Paddock";
+    public static final String RMI_REGISTRY_OUTSIDEWORLD_NAME = "OutsideWorld";
     
     public static final String NAME_REPAIRAREA = "l040101-ws04.ua.pt";
-    public static final String RMI_REGISTRY_REPAIRAREA_NAME = "BettingCenter";
+    public static final String RMI_REGISTRY_REPAIRAREA_NAME = "RepairArea";
     
     public static final String NAME_PARK = "l040101-ws05.ua.pt";
-    public static final String RMI_REGISTRY_PARK_NAME = "RacingTrack";
+    public static final String RMI_REGISTRY_PARK_NAME = "Park";
     
     public static final String NAME_SUPPLIERSITE = "l040101-ws06.ua.pt";
-    public static final String RMI_REGISTRY_SUPPLIERSITE_NAME = "ControlCenter";
+    public static final String RMI_REGISTRY_SUPPLIERSITE_NAME = "SupplierSite";
     
     public static final String NAME_REGISTRY = "l040101-ws07.ua.pt";
     
     public static final String NAME_MANAGER = "l040101-ws08.ua.pt";
-    public static final String RMI_REGISTRY_MANAGER_NAME = "Broker";
+    public static final String RMI_REGISTRY_MANAGER_NAME = "Manager";
     
     public static final String NAME_MECHANICS = "l040101-ws09.ua.pt";
-    public static final String RMI_REGISTRY_MECHANICS_NAME = "Spectators";
+    public static final String RMI_REGISTRY_MECHANICS_NAME = "Mechanics";
     
     public static final String NAME_CUSTOMERS = "l040101-ws10.ua.pt";
-    public static final String RMI_REGISTRY_CUSTOMERS_NAME = "Horses";
+    public static final String RMI_REGISTRY_CUSTOMERS_NAME = "Customers";
     
 }

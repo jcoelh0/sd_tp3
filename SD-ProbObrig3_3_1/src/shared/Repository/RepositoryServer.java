@@ -27,7 +27,7 @@ public class RepositoryServer {
         RepositoryInterface repositoryInterface = null;
         
         try {
-            repositoryInterface = (RepositoryInterface) UnicastRemoteObject.exportObject((Remote) repositoryInterface, RegistryConfiguration.PORT_REPOSITORY);
+            repositoryInterface = (RepositoryInterface) UnicastRemoteObject.exportObject((Remote) repository, RegistryConfiguration.PORT_REPOSITORY);
         }
         catch(RemoteException e) {
             System.out.println("Error generating Repository's stub: " + e.getMessage());
