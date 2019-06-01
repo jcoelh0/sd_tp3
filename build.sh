@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
-javac -cp "SD-ProbObrig3_3_1/src/genclass.jar" SD-ProbObrig3_3_1/src/interfaces/*.java SD-ProbObrig3_3_1/src/settings/*.java SD-ProbObrig3_3_1/src/registry/*.java SD-ProbObrig3_3_1/src/entities/Customer/*.java SD-ProbObrig3_3_1/src/entities/Customer/Interfaces/*.java  SD-ProbObrig3_3_1/src/entities/Customer/States/*.java SD-ProbObrig3_3_1/src/entities/Manager/*.java SD-ProbObrig3_3_1/src/entities/Manager/Interfaces/*.java SD-ProbObrig3_3_1/src/entities/Manager/States/*.java SD-ProbObrig3_3_1/src/entities/Mechanic/*.java SD-ProbObrig3_3_1/src/entities/Mechanic/Interfaces/*.java SD-ProbObrig3_3_1/src/entities/Mechanic/States/*.java SD-ProbObrig3_3_1/src/shared/Lounge/*.java SD-ProbObrig3_3_1/src/shared/OutsideWorld/*.java SD-ProbObrig3_3_1/src/shared/Park/*.java SD-ProbObrig3_3_1/src/shared/RepairArea/*.java SD-ProbObrig3_3_1/src/shared/Repository/*.java SD-ProbObrig3_3_1/src/shared/SupplierSite/*.java
-
 cd SD-ProbObrig3_3_1/src
+
+find -name "*.java" > sources.txt
+javac -cp genclass.jar:./ @sources.txt
+rm sources.txt
+
+#javac -cp "SD-ProbObrig3_3_1/src/genclass.jar" SD-ProbObrig3_3_1/src/interfaces/*.java SD-ProbObrig3_3_1/src/settings/*.java SD-ProbObrig3_3_1/src/registry/*.java SD-ProbObrig3_3_1/src/entities/Customer/*.java SD-ProbObrig3_3_1/src/entities/Customer/Interfaces/*.java  SD-ProbObrig3_3_1/src/entities/Customer/States/*.java SD-ProbObrig3_3_1/src/entities/Manager/*.java SD-ProbObrig3_3_1/src/entities/Manager/Interfaces/*.java SD-ProbObrig3_3_1/src/entities/Manager/States/*.java SD-ProbObrig3_3_1/src/entities/Mechanic/*.java SD-ProbObrig3_3_1/src/entities/Mechanic/Interfaces/*.java SD-ProbObrig3_3_1/src/entities/Mechanic/States/*.java SD-ProbObrig3_3_1/src/shared/Lounge/*.java SD-ProbObrig3_3_1/src/shared/OutsideWorld/*.java SD-ProbObrig3_3_1/src/shared/Park/*.java SD-ProbObrig3_3_1/src/shared/RepairArea/*.java SD-ProbObrig3_3_1/src/shared/Repository/*.java SD-ProbObrig3_3_1/src/shared/SupplierSite/*.java
 
 mkdir deploy
 mkdir deploy/interfaces
@@ -50,3 +54,5 @@ cp entities/Mechanic/States/*.class deploy/entities/Mechanic/States/
 cp entities/Customer/States/*.class deploy/entities/Customer/States/
 
 cp settings/*.class deploy/settings/
+
+cd ../..

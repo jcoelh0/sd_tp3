@@ -1,12 +1,12 @@
 package registry;
 
+import interfaces.Register;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import interfaces.Register;
 
 /**
  *  This data type defines a generic functionality to register remote objects in the local registry service.

@@ -2,6 +2,7 @@ package shared.Repository;
 
 import interfaces.Register;
 import interfaces.RepositoryInterface;
+import java.io.FileNotFoundException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -18,7 +19,7 @@ import registry.RegistryConfiguration;
  */
 public class RepositoryServer {
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         
         String rmiRegHostName = args[0];
         int rmiRegPortNumb = Integer.parseInt(args[1]);

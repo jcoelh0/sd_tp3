@@ -6,14 +6,15 @@ import entities.Mechanic.States.MechanicState;
 import static settings.Constants.N_CUSTOMERS;
 import static settings.Constants.N_REPLACEMENT_CARS;
 import static settings.Constants.N_TYPE_PIECES;
-import genclass.FileOp;
-import genclass.GenericIO;
-import genclass.TextFile;
 import java.util.Arrays;
 import java.util.HashMap;
 import static settings.Constants.N_MECHANICS;
 import settings.EnumPiece;
 import interfaces.RepositoryInterface;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 
 /**
  *
@@ -23,7 +24,7 @@ import interfaces.RepositoryInterface;
 public class Repository implements RepositoryInterface {
     
     private final String file_name = "log.txt";
-    TextFile log = new TextFile();
+    public PrintWriter writer;
     
     private String managerState;  
     private String[] customerState = new String[N_CUSTOMERS];
@@ -55,10 +56,8 @@ public class Repository implements RepositoryInterface {
 	 * @param rmiRegHostName
 	 * @param rmiRegPortNumb
      */
-    public Repository(String rmiRegHostName, int rmiRegPortNumb) {
-        if(FileOp.exists(".", file_name)) {
-            FileOp.deleteFile(".", file_name);
-        }
+    public Repository(String rmiRegHostName, int rmiRegPortNumb) throws FileNotFoundException {
+        writer = new PrintWriter(new FileOutputStream(new File(file_name), true ));
         
         Arrays.fill(mechanicState, MechanicState.WAITING_FOR_WORK.toString());
         Arrays.fill(customerState, CustomerState.NORMAL_LIFE_WITH_CAR.toString());
@@ -83,10 +82,6 @@ public class Repository implements RepositoryInterface {
      * Method that updates the log each time something changes.
      */
     public void updateLog() {
-        if(!log.openForAppending(".", file_name)) {
-            GenericIO.writelnString("Couldn't create " + file_name + "!");
-            System.exit(1);
-        }
         
         String s = managerState;
         
@@ -112,11 +107,11 @@ public class Repository implements RepositoryInterface {
         
         s += "\n";
         
-        log.writelnString(s);
-        if(!log.close()) {
+        writer.println(s);
+        /*if(!log.close()) {
             GenericIO.writelnString("Couldn't close " + file_name + "!");
             System.exit(1);
-        }
+        }*/
     }
     
     /**

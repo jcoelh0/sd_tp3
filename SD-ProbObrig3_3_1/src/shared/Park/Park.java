@@ -202,12 +202,12 @@ public class Park implements ICustomerP, IMechanicP, IManagerP, ParkInterface {
     }
     
     private synchronized void updateNumRepCars(int numrepcars) {
-        try {
-            repositoryInterface.setReplacementParked(numrepcars);
+        /*try {
+            //repositoryInterface.setReplacementParked(numrepcars);
         }
         catch(RemoteException e) {
             System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
             System.exit(1);
-        }
+        }*/
     }
 }
