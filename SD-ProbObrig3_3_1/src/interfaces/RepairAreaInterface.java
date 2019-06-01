@@ -34,4 +34,6 @@ public interface RepairAreaInterface extends Remote {
 
     public void enoughWork() throws RemoteException;
     
+    public void signalShutdown() throws RemoteException;
+    
 }

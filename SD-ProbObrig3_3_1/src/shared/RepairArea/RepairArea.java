@@ -5,9 +5,15 @@ import entities.Mechanic.Interfaces.IMechanicRA;
 import entities.Manager.Interfaces.IManagerRA;
 import entities.Manager.States.ManagerState;
 import entities.Mechanic.States.MechanicState;
+import interfaces.Register;
 import interfaces.RepairAreaInterface;
 import interfaces.RepositoryInterface;
+import java.rmi.NoSuchObjectException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import settings.Constants;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import registry.RegistryConfiguration;
 import settings.EnumPiece;
 import settings.Piece;
 
@@ -365,4 +372,54 @@ public class RepairArea implements IMechanicRA, IManagerRA, RepairAreaInterface 
             System.exit(1);
         }
     }
+    
+    @Override
+    public void signalShutdown() {
+        Register reg = null;
+        Registry registry = null;
+        
+        try {
+            registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
+        } 
+        catch (RemoteException ex) {
+            System.out.println("Erro ao localizar o registo");
+            System.exit(1);
+        }
+        
+        String nameEntryBase = RegistryConfiguration.RMI_REGISTER_NAME;
+        String nameEntryObject = RegistryConfiguration.RMI_REGISTRY_REPAIRAREA_NAME;
+        
+        try {
+            reg = (Register) registry.lookup(nameEntryBase);
+        } catch (RemoteException e) {
+            System.out.println("RegisterRemoteObject lookup exception: " + e.getMessage());
+            System.exit(1);
+        } catch (NotBoundException e) {
+            System.out.println("RegisterRemoteObject not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        
+        // Unregister ourself
+        try {
+            reg.unbind(nameEntryObject);
+        } catch (RemoteException e) {
+            System.out.println("RepairArea registration exception: " + e.getMessage());
+            System.exit(1);
+        } catch (NotBoundException e) {
+            System.out.println("RepairArea not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // Unexport; this will also remove us from the RMI runtime
+        try {
+            UnicastRemoteObject.unexportObject(this, true);
+        } catch (NoSuchObjectException ex) {
+            System.exit(1);
+        }
+
+        System.out.println("RepairArea closed.");
+    }
+    
 }

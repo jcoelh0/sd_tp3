@@ -46,4 +46,6 @@ public interface LoungeInterface extends Remote {
     public boolean alertCustomer(int id) throws RemoteException;
     
 	public void addToReplacementQueue(int cust_id) throws RemoteException;
+    
+    public void signalShutdown() throws RemoteException;
 }

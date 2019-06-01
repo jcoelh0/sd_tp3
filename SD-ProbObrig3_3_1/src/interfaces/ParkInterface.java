@@ -25,4 +25,6 @@ public interface ParkInterface extends Remote {
 
     public int reserveCar(int id) throws RemoteException;
     
+    public void signalShutdown() throws RemoteException;
+    
 }

@@ -45,5 +45,7 @@ public interface RepositoryInterface extends Remote {
     public void setVehicleDriven(String s, int i) throws RemoteException;
 
     public void setVehicleRepaired(String s, int i) throws RemoteException;
+    
+    public void finished() throws RemoteException;
 
 }

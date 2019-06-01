@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.Random;
 import settings.Constants;
 import interfaces.*;
+import java.rmi.NoSuchObjectException;
+import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import registry.RegistryConfiguration;
 
 /**
  *
@@ -208,5 +214,54 @@ public class OutsideWorld implements ICustomerOW, IManagerOW, OutsideWorldInterf
             System.err.println("Excepção na invocação remota de método" + e.getMessage() + "!");
             System.exit(1);
         }
+    }
+    
+    @Override
+    public void signalShutdown() {
+        Register reg = null;
+        Registry registry = null;
+        
+        try {
+            registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
+        } 
+        catch (RemoteException ex) {
+            System.out.println("Erro ao localizar o registo");
+            System.exit(1);
+        }
+        
+        String nameEntryBase = RegistryConfiguration.RMI_REGISTER_NAME;
+        String nameEntryObject = RegistryConfiguration.RMI_REGISTRY_OUTSIDEWORLD_NAME;
+        
+        try {
+            reg = (Register) registry.lookup(nameEntryBase);
+        } catch (RemoteException e) {
+            System.out.println("RegisterRemoteObject lookup exception: " + e.getMessage());
+            System.exit(1);
+        } catch (NotBoundException e) {
+            System.out.println("RegisterRemoteObject not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+        
+        // Unregister ourself
+        try {
+            reg.unbind(nameEntryObject);
+        } catch (RemoteException e) {
+            System.out.println("OutsideWorld registration exception: " + e.getMessage());
+            System.exit(1);
+        } catch (NotBoundException e) {
+            System.out.println("OutsideWorld not bound exception: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // Unexport; this will also remove us from the RMI runtime
+        try {
+            UnicastRemoteObject.unexportObject(this, true);
+        } catch (NoSuchObjectException ex) {
+            System.exit(1);
+        }
+
+        System.out.println("OutsideWorld closed.");
     }
 }

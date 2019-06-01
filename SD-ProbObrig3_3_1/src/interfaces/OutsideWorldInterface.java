@@ -18,4 +18,6 @@ public interface OutsideWorldInterface extends Remote {
     
     public boolean phoneCustomer(int id) throws RemoteException;
     
+    public void signalShutdown() throws RemoteException;
+    
 }

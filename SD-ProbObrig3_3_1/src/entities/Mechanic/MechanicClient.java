@@ -94,7 +94,7 @@ public class MechanicClient {
 
         for (int i = 0; i < Constants.N_MECHANICS; i++) {
             mechanics[i] = new Mechanic(i, loungeInt, repairAreaInt, parkInt, repositoryInt);
-            System.out.println("Customer " + i + " has started");
+            System.out.println("Mechanic " + i + " has started");
             mechanics[i].start();
         }
 
@@ -106,14 +106,15 @@ public class MechanicClient {
                 System.out.println("Mechanic " + i + " has died - exeption");
             }
         }
-
-        /*try {
-			repositoryInt.finished();
-		} catch (RemoteException ex) {
-			System.out.println("Error closing all!");
-			System.exit(1);
-		}*/
-        System.out.println("Customers Done!");
+        
+        try {
+            repositoryInterface.finished();
+        } catch (RemoteException ex) {
+            System.out.println("Error closing all!");
+            System.exit(1);
+        }
+        
+        System.out.println("Mechanics Done!");
 
     }
 }

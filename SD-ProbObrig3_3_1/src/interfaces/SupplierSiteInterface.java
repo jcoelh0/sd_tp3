@@ -13,4 +13,6 @@ public interface SupplierSiteInterface extends Remote {
 
     public int goToSupplier(Piece partNeeded) throws RemoteException;
     
+    public void signalShutdown() throws RemoteException;
+    
 }

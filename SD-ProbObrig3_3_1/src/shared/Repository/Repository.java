@@ -6,15 +6,29 @@ import entities.Mechanic.States.MechanicState;
 import static settings.Constants.N_CUSTOMERS;
 import static settings.Constants.N_REPLACEMENT_CARS;
 import static settings.Constants.N_TYPE_PIECES;
+import genclass.FileOp;
+import genclass.GenericIO;
+import genclass.TextFile;
+import interfaces.LoungeInterface;
+import interfaces.OutsideWorldInterface;
+import interfaces.ParkInterface;
+import interfaces.Register;
+import interfaces.RepairAreaInterface;
 import java.util.Arrays;
 import java.util.HashMap;
 import static settings.Constants.N_MECHANICS;
 import settings.EnumPiece;
 import interfaces.RepositoryInterface;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
+import interfaces.SupplierSiteInterface;
+import java.rmi.NoSuchObjectException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import registry.RegistryConfiguration;
 
 /**
  *
@@ -24,7 +38,9 @@ import java.io.PrintWriter;
 public class Repository implements RepositoryInterface {
     
     private final String file_name = "log.txt";
-    public PrintWriter writer;
+    TextFile log = new TextFile();
+    
+    private int n_entities = 3;
     
     private String managerState;  
     private String[] customerState = new String[N_CUSTOMERS];
@@ -56,8 +72,10 @@ public class Repository implements RepositoryInterface {
 	 * @param rmiRegHostName
 	 * @param rmiRegPortNumb
      */
-    public Repository(String rmiRegHostName, int rmiRegPortNumb) throws FileNotFoundException {
-        writer = new PrintWriter(new FileOutputStream(new File(file_name), true ));
+    public Repository(String rmiRegHostName, int rmiRegPortNumb) {
+        if(FileOp.exists(".", file_name)) {
+            FileOp.deleteFile(".", file_name);
+        }
         
         Arrays.fill(mechanicState, MechanicState.WAITING_FOR_WORK.toString());
         Arrays.fill(customerState, CustomerState.NORMAL_LIFE_WITH_CAR.toString());
@@ -81,7 +99,12 @@ public class Repository implements RepositoryInterface {
     /**
      * Method that updates the log each time something changes.
      */
+    @Override
     public void updateLog() {
+        if(!log.openForAppending(".", file_name)) {
+            GenericIO.writelnString("Couldn't create " + file_name + "!");
+            System.exit(1);
+        }
         
         String s = managerState;
         
@@ -107,17 +130,18 @@ public class Repository implements RepositoryInterface {
         
         s += "\n";
         
-        writer.println(s);
-        /*if(!log.close()) {
+        log.writelnString(s);
+        if(!log.close()) {
             GenericIO.writelnString("Couldn't close " + file_name + "!");
             System.exit(1);
-        }*/
+        }
     }
     
     /**
      * Method that updates the manager state.
      * @param state new manager state
      */
+    @Override
     public synchronized void setManagerState(String state) {
         managerState = state;
         updateLog();
@@ -128,6 +152,7 @@ public class Repository implements RepositoryInterface {
      * @param state new customer state
      * @param i id of the customer
      */
+    @Override
     public synchronized void setCustomerState(String state, int i) {
         customerState[i] = state;
         updateLog();
@@ -138,6 +163,7 @@ public class Repository implements RepositoryInterface {
      * @param state new mechanic state
      * @param i id of the mechanic
      */
+    @Override
     public synchronized void setMechanicState(String state, int i) {
         mechanicState[i] = state;
         updateLog();
@@ -147,6 +173,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the number of customers in queue.
      * @param size size of the queue.
      */
+    @Override
     public synchronized void setCustomersQueue(int size) {
         customersQueue = size;
         updateLog();
@@ -157,6 +184,7 @@ public class Repository implements RepositoryInterface {
      * car.
      * @param size number of customers waiting. 
      */
+    @Override
     public synchronized void setReplacementQueue(int size) {
         replacementQueue = size;
         updateLog();
@@ -166,6 +194,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the number of cars that have been repaired.
      * @param size number of cars repaired.
      */
+    @Override
     public synchronized void setNumCarsRepaired(int size) {
         numCarsRepaired = size;
         updateLog();
@@ -175,6 +204,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the number of customer cars parked.
      * @param n number of cars parked.
      */
+    @Override
     public synchronized void setCustomersParked(int n) {
         customersParked = n;
         updateLog();
@@ -184,6 +214,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the number of replacement cars parked.
      * @param n number of cars parked.
      */
+    @Override
     public synchronized void setReplacementParked(int n) {
         replacementParked = n;
         updateLog();
@@ -193,6 +224,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the number of requests made to the manager.
      * @param n number of requests.
      */
+    @Override
     public synchronized void setRequests(int n) {
         requests = n;
         updateLog();
@@ -202,6 +234,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the number of pieces in stock.
      * @param pieces current stock.
      */
+    @Override
     public synchronized void setPiecesStock(HashMap<EnumPiece, Integer> pieces) {
         int i = 0;
         for(EnumPiece key : pieces.keySet()) {
@@ -215,6 +248,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the pieces that are required.
      * @param pieces pieces required.
      */
+    @Override
     public synchronized void setPiecesRequired(int[] pieces) {
         piecesRequired = pieces;
         updateLog();
@@ -225,6 +259,7 @@ public class Repository implements RepositoryInterface {
      * to go get.
      * @param not pieces notified. 
      */
+    @Override
     public synchronized void setManagerNotifed(String[] not) {
         managerNotified = not;
         updateLog();
@@ -234,6 +269,7 @@ public class Repository implements RepositoryInterface {
      * Method that updates the pieces that the manager has bought.
      * @param pieces pieces bought.
      */
+    @Override
     public synchronized void setBoughtPieces(int[] pieces) {
         for(int i = 0; i < boughtPieces.length; i++) {
             boughtPieces[i] += pieces[i];
@@ -246,6 +282,7 @@ public class Repository implements RepositoryInterface {
      * @param s "T" if true, "F" if false
      * @param i id of customer
      */
+    @Override
     public synchronized void setRequiresCar(String s, int i) {
         requiresCar[i] = s;
         updateLog();
@@ -256,6 +293,7 @@ public class Repository implements RepositoryInterface {
      * @param s car driven
      * @param i id of customer
      */
+    @Override
     public synchronized void setVehicleDriven(String s, int i) {
         carsDriven[i] = s;
         updateLog();
@@ -266,8 +304,128 @@ public class Repository implements RepositoryInterface {
      * @param s car driven
      * @param i id of customer
      */
+    @Override
     public synchronized void setVehicleRepaired(String s, int i) {
         repairedCars[i] = s;
         updateLog();
+    }
+    
+    @Override
+    public void finished() throws RemoteException {
+        n_entities--;
+        if (n_entities > 0) {
+            return;
+        }
+        terminateServers();
+    }
+    
+    private void terminateServers() { 
+        Register reg = null;
+        Registry registry = null;
+        
+        try {
+            registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
+        } catch (RemoteException ex) {
+            System.out.println("Erro na localização do registo");
+            System.exit(1);
+        }
+        
+        String nameEntryBase = RegistryConfiguration.RMI_REGISTER_NAME;
+        String nameEntryObject = RegistryConfiguration.RMI_REGISTRY_REPOSITORY_NAME;
+        
+        try {
+            LoungeInterface li = (LoungeInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_LOUNGE_NAME);
+            li.signalShutdown();
+        } 
+        catch (RemoteException e) {
+            System.out.println("Exception thrown while locating Lounge: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        catch (NotBoundException e) {
+            System.out.println("Lounge is not registered: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        
+        try {
+            OutsideWorldInterface ooi = (OutsideWorldInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_OUTSIDEWORLD_NAME);
+            ooi.signalShutdown();
+        } 
+        catch (RemoteException e) {
+            System.out.println("Exception thrown while locating OutsideWorld: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        catch (NotBoundException e) {
+            System.out.println("OutsideWorld is not registered: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        
+        try {
+            RepairAreaInterface rai = (RepairAreaInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_REPAIRAREA_NAME);
+            rai.signalShutdown();
+        } 
+        catch (RemoteException e) {
+            System.out.println("Exception thrown while locating RepairArea: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        catch (NotBoundException e) {
+            System.out.println("RepairArea is not registered: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        
+        try {
+            ParkInterface pi = (ParkInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_PARK_NAME);
+            pi.signalShutdown();
+        } 
+        catch (RemoteException e) {
+            System.out.println("Exception thrown while locating Park: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        catch (NotBoundException e) {
+            System.out.println("Park is not registered: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        
+        try {
+            SupplierSiteInterface ssi = (SupplierSiteInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_SUPPLIERSITE_NAME);
+            ssi.signalShutdown();
+        } 
+        catch (RemoteException e) {
+            System.out.println("Exception thrown while locating SupplierSite: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        catch (NotBoundException e) {
+            System.out.println("SupplierSite is not registered: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        
+        try {
+            reg = (Register) registry.lookup(nameEntryBase);
+        } 
+        catch (RemoteException e) {
+            System.out.println("RegisterRemoteObject lookup exception: " + e.getMessage());
+            System.exit(1);
+        } 
+        catch (NotBoundException e) {
+            System.out.println("RegisterRemoteObject not bound exception: " + e.getMessage());
+            System.exit(1);
+        }
+       
+        try {
+            reg.unbind(nameEntryObject);
+        } catch (RemoteException e) {
+            System.out.println("Log registration exception: " + e.getMessage());
+            System.exit(1);
+        } catch (NotBoundException e) {
+            System.out.println("Log not bound exception: " + e.getMessage());
+            System.exit(1);
+        }
+        
+        try {
+            UnicastRemoteObject.unexportObject(this, true);
+        } 
+        catch (NoSuchObjectException ex) {
+            System.exit(1);
+        }
+        System.out.println("Repository closed.");      
     }
 }

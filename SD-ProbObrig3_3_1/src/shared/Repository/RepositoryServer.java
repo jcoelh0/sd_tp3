@@ -19,7 +19,7 @@ import registry.RegistryConfiguration;
  */
 public class RepositoryServer {
     
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) {
         
         String rmiRegHostName = args[0];
         int rmiRegPortNumb = Integer.parseInt(args[1]);

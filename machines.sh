@@ -130,8 +130,13 @@ sshpass -p $password scp customer.sh $username@$CustomerHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$CustomerHostName "cd ~/Public/src ; bash customer.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
+echo "Retrieving Log"
+sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$RepositoryHostName "cat Public/src/log.txt" > Log.txt
+sleep 2
+
 echo "Stopping rmi processes"
 
+bash kill_ports.sh
 bash kill_rmi.sh
 
 echo "Cleaning local classes"

@@ -1,6 +1,5 @@
 package entities.Manager;
 
-import entities.Customer.*;
 import interfaces.LoungeInterface;
 import interfaces.OutsideWorldInterface;
 import interfaces.ParkInterface;
@@ -12,7 +11,6 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import registry.RegistryConfiguration;
-import settings.Constants;
 import static settings.Constants.N_CUSTOMERS;
 
 /**
@@ -116,7 +114,7 @@ public class ManagerClient {
             System.exit(1);
         }
 
-        Manager manager = new Manager(Constants.N_MECHANICS, loungeInt, outsideWorldInt, supplierSiteInt, repairAreaInt, parkInt);
+        Manager manager = new Manager(N_CUSTOMERS, loungeInt, outsideWorldInt, supplierSiteInt, repairAreaInt, parkInt);
         System.out.println("Manager has started");
         manager.start();
 
@@ -127,13 +125,14 @@ public class ManagerClient {
             System.out.println("Manager has died - exeption");
         }
 
-        /*try {
-			repositoryInt.finished();
-		} catch (RemoteException ex) {
-			System.out.println("Error closing all!");
-			System.exit(1);
-		}*/
-        System.out.println("Customers Done!");
+        try {
+            repositoryInterface.finished();
+        } catch (RemoteException ex) {
+            System.out.println("Error closing all!");
+            System.exit(1);
+        }
+        
+        System.out.println("Manager Done!");
 
     }
 }

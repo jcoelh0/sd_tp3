@@ -105,12 +105,13 @@ public class CustomerClient {
             }
         }
 
-        /*try {
-			repositoryInt.finished();
-		} catch (RemoteException ex) {
-			System.out.println("Error closing all!");
-			System.exit(1);
-		}*/
+        try {
+            repositoryInterface.finished();
+        } catch (RemoteException ex) {
+            System.out.println("Error closing all!");
+            System.exit(1);
+        }
+        
         System.out.println("Customers Done!");
 
     }
