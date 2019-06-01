@@ -39,11 +39,11 @@ public class Manager extends Thread {
      * Instantiates the manager.
      *
      * @param nCustomers number of customers.
-     * @param loungeInt
-     * @param outsideWorldInt
-     * @param supplierSiteInt
-     * @param repairAreaInt
-     * @param parkInt
+     * @param loungeInt interface of lounge
+     * @param outsideWorldInt interface of outsideworld
+     * @param supplierSiteInt interface of suppliersite
+     * @param repairAreaInt interface of repairarea
+     * @param parkInt interface of park
      */
     public Manager(int nCustomers, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, SupplierSiteInterface supplierSiteInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt) {
         this.nCustomers = nCustomers;

@@ -69,8 +69,8 @@ public class Repository implements RepositoryInterface {
     
     /**
      * Repository constructor. Creates the log file and initializes data.
-	 * @param rmiRegHostName
-	 * @param rmiRegPortNumb
+	 * @param rmiRegHostName host name
+	 * @param rmiRegPortNumb host port
      */
     public Repository(String rmiRegHostName, int rmiRegPortNumb) {
         if(FileOp.exists(".", file_name)) {

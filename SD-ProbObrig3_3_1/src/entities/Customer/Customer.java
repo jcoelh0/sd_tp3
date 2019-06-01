@@ -36,9 +36,9 @@ public class Customer extends Thread {
      * Instantiation of a customer.
      *
      * @param i represents its id.
-     * @param loungeInt
-     * @param outsideWorldInt
-     * @param parkInt
+     * @param loungeInt interface of lounge
+     * @param outsideWorldInt interface of outsideworld
+     * @param parkInt interface of park
      */
     public Customer(int i, LoungeInterface loungeInt, OutsideWorldInterface outsideWorldInt, ParkInterface parkInt) {
         this.id = i;

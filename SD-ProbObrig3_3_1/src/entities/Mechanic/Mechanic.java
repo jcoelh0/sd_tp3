@@ -36,10 +36,10 @@ public class Mechanic extends Thread {
      * Instantiates a mechanic.
      *
      * @param i is the mechanic id.
-     * @param loungeInt
-     * @param repairAreaInt
-     * @param parkInt
-     * @param repositoryInt
+     * @param loungeInt interface of lounge
+     * @param repairAreaInt interface of repairarea
+     * @param parkInt interface of park
+     * @param repositoryInt interface of repository
      */
     public Mechanic(int i, LoungeInterface loungeInt, RepairAreaInterface repairAreaInt, ParkInterface parkInt, RepositoryInterface repositoryInt) {
         this.id = i;
