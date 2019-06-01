@@ -5,6 +5,7 @@ import entities.Mechanic.Interfaces.IMechanicRA;
 import entities.Manager.Interfaces.IManagerRA;
 import entities.Manager.States.ManagerState;
 import entities.Mechanic.States.MechanicState;
+import interfaces.RepairAreaInterface;
 import interfaces.RepositoryInterface;
 import java.rmi.RemoteException;
 import settings.Constants;
@@ -23,7 +24,7 @@ import settings.Piece;
  * @author André Oliveira
  * @author João Coelho
  */
-public class RepairArea implements IMechanicRA, IManagerRA {
+public class RepairArea implements IMechanicRA, IManagerRA, RepairAreaInterface {
     
     private final Queue<Integer> carsToRepair = new LinkedList<>();
     private final HashMap<Integer, Piece> carsWaitingForPieces = new HashMap<>();

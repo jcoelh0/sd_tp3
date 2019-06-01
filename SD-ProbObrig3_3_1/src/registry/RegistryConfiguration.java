@@ -39,12 +39,12 @@ public class RegistryConfiguration {
     public static final String NAME_SUPPLIERSITE = "l040101-ws06.ua.pt";
     public static final String RMI_REGISTRY_SUPPLIERSITE_NAME = "SupplierSite";
     
-    public static final String NAME_REGISTRY = "l040101-ws07.ua.pt";
+    public static final String NAME_REGISTRY = "l040101-ws09.ua.pt";
     
-    public static final String NAME_MANAGER = "l040101-ws08.ua.pt";
+    public static final String NAME_MANAGER = "l040101-ws07.ua.pt";
     public static final String RMI_REGISTRY_MANAGER_NAME = "Manager";
     
-    public static final String NAME_MECHANICS = "l040101-ws09.ua.pt";
+    public static final String NAME_MECHANICS = "l040101-ws08.ua.pt";
     public static final String RMI_REGISTRY_MECHANICS_NAME = "Mechanics";
     
     public static final String NAME_CUSTOMERS = "l040101-ws10.ua.pt";

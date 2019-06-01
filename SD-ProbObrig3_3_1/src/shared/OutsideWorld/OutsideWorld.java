@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import settings.Constants;
+import interfaces.*;
 
 /**
  *
  * @author André Oliveira
  * @author João Coelho
  */
-public class OutsideWorld implements ICustomerOW, IManagerOW {
+public class OutsideWorld implements ICustomerOW, IManagerOW, OutsideWorldInterface {
     
     private final List<Integer> repairedCars;
     private final List<Integer> waitingForCar;

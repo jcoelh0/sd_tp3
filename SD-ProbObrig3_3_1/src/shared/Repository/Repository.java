@@ -13,13 +13,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import static settings.Constants.N_MECHANICS;
 import settings.EnumPiece;
+import interfaces.RepositoryInterface;
 
 /**
  *
  * @author André Oliveira
  * @author João Coelho
  */
-public class Repository {
+public class Repository implements RepositoryInterface {
     
     private final String file_name = "log.txt";
     TextFile log = new TextFile();

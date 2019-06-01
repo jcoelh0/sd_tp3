@@ -14,13 +14,14 @@ import java.util.Queue;
 import settings.Piece;
 import settings.Constants;
 import java.rmi.RemoteException;
+import interfaces.*;
 
 /**
  *
  * @author André Oliveira
  * @author João Coelho
  */
-public class Lounge implements ICustomerL, IManagerL, IMechanicL {
+public class Lounge implements ICustomerL, IManagerL, IMechanicL, LoungeInterface {
 
     private final Queue<Integer> replacementQueue = new LinkedList<>();
     private final HashMap<Integer, Integer> customersWithRepCar = new HashMap<>();

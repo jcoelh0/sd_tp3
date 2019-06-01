@@ -5,6 +5,7 @@ import entities.Manager.Interfaces.IManagerP;
 import entities.Customer.Interfaces.ICustomerP;
 import entities.Customer.States.CustomerState;
 import entities.Mechanic.States.MechanicState;
+import interfaces.ParkInterface;
 import interfaces.RepositoryInterface;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import settings.Constants;
  * @author André Oliveira
  * @author João Coelho
  */
-public class Park implements ICustomerP, IMechanicP, IManagerP {
+public class Park implements ICustomerP, IMechanicP, IManagerP, ParkInterface {
     
     private int parkingSlots = 50;
     private int numcars = 0;

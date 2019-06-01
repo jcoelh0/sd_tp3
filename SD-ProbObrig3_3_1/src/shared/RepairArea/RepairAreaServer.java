@@ -10,6 +10,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+
 import registry.RegistryConfiguration;
 
 /**
@@ -25,7 +26,7 @@ public class RepairAreaServer {
         int rmiRegPortNumb = Integer.parseInt(args[1]);
         
         RepositoryInterface repositoryInterface = null;
-        
+    
         try {
             Registry registry = LocateRegistry.getRegistry(rmiRegHostName, rmiRegPortNumb);
             repositoryInterface = (RepositoryInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_REPOSITORY_NAME);

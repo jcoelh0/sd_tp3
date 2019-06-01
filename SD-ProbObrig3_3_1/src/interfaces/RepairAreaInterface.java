@@ -12,8 +12,6 @@ import settings.Piece;
  */
 public interface RepairAreaInterface extends Remote {
 
-    public void parkCar(int id) throws RemoteException;
-
     public HashMap getPieces() throws RemoteException;
 
     public boolean readThePaper(int idMechanic) throws RemoteException;

@@ -2,6 +2,7 @@ package shared.SupplierSite;
 
 import entities.Manager.Interfaces.IManagerSS;
 import interfaces.RepositoryInterface;
+import interfaces.SupplierSiteInterface;
 import java.rmi.RemoteException;
 import settings.Piece;
 import settings.Constants;
@@ -11,7 +12,7 @@ import settings.Constants;
  * @author André Oliveira
  * @author João Coelho
  */
-public class SupplierSite implements IManagerSS {
+public class SupplierSite implements IManagerSS, SupplierSiteInterface {
     
     private Piece partNeeded;
     private int[] piecesBought;

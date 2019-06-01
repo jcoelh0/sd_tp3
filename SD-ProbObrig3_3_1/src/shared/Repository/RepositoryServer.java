@@ -69,6 +69,7 @@ public class RepositoryServer {
             System.exit(1);
         }
         
+        System.out.println("Repository up!");
     }
     
 }
