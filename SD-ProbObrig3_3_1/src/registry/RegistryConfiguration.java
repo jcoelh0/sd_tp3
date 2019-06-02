@@ -20,7 +20,19 @@ public class RegistryConfiguration {
     public static final int PORT_MANAGER = 22316;
     public static final int PORT_MECHANICS = 22317;
     public static final int PORT_CUSTOMERS = 22318;
+    /*
     
+    public static final int RMI_REGISTER_PORT = 22961;
+    public static final int PORT_REPOSITORY = 22310;
+    public static final int PORT_LOUNGE = 22311;
+    public static final int PORT_OUTSIDEWORLD = 22312;
+    public static final int PORT_REPAIRAREA = 22313;
+    public static final int PORT_PARK = 22314;
+    public static final int PORT_SUPPLIERSITE = 22315;
+    public static final int PORT_MANAGER = 22316;
+    public static final int PORT_MECHANICS = 22317;
+    public static final int PORT_CUSTOMERS = 22318;
+    */
     public static final String NAME_REPOSITORY = "l040101-ws01.ua.pt";
     public static final String RMI_REGISTRY_REPOSITORY_NAME = "Repository";
     

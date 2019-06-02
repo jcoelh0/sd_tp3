@@ -56,7 +56,7 @@ public class Lounge implements ICustomerL, IManagerL, IMechanicL, LoungeInterfac
         
         this.repositoryInterface = repository;
         this.rmiRegHostName = rmiRegHostName;
-        this.rmiRegHostName = rmiRegHostName;
+        this.rmiRegPortNumb = rmiRegPortNumb;
     }
 
     /**

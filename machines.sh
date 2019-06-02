@@ -135,9 +135,9 @@ sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$RepositoryHos
 sleep 2
 
 echo "Stopping rmi processes"
-
-bash kill_ports.sh
 bash kill_rmi.sh
+bash kill_ports.sh
+
 
 echo "Cleaning local classes"
 
