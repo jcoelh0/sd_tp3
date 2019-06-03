@@ -18,6 +18,7 @@ echo "Building..."
 
 bash build.sh
 
+echo " "
 echo "Compressing..."
 
 cd SD-ProbObrig3_3_1/
@@ -28,7 +29,8 @@ cd ..
 
 sleep 5
    
-echo "Sending compressed project..."
+echo " "
+echo "Sending compressed project to the remote machines..."
 
 sshpass -p $password scp SD-ProbObrig3_3_1/deploy.tar.gz $username@$registryHostName:~/Public
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$registryHostName "cd ~/Public ; tar -xmzf deploy.tar.gz" &
@@ -62,87 +64,104 @@ sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$CustomerHostN
 
 sleep 1
 
-echo "Running project..."
+echo " "
+echo "Running project on remote machines:"
 
-echo "Setting rmi"
+echo "- Setting RMI..."
 
 sshpass -p $password scp set_registry.sh $username@$registryHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$registryHostName "cd ~/Public/src ; sh set_registry.sh $registryPortNum" &
 sleep 5
 
-echo "Setting service register"
+echo " "
+echo "- Starting Service Register..."
 
 sshpass -p $password scp registry.sh $username@$registryHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$registryHostName "cd ~/Public/src ; bash registry.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting repository"
+echo " "
+echo "- Starting Repository..."
 
 sshpass -p $password scp repository.sh $username@$RepositoryHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$RepositoryHostName "cd ~/Public/src ; bash repository.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting lounge"
+echo " "
+echo "- Starting Lounge..."
 
 sshpass -p $password scp lounge.sh $username@$LoungeHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$LoungeHostName "cd ~/Public/src ; bash lounge.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting outsideworld"
+echo " "
+echo "- Starting OutsideWorld..."
 
 sshpass -p $password scp outsideworld.sh $username@$OutsideWorldHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$OutsideWorldHostName "cd ~/Public/src ; bash outsideworld.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting repairarea"
+echo " "
+echo "- Starting RepairArea..."
 
 sshpass -p $password scp repairarea.sh $username@$RepairAreaHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$RepairAreaHostName "cd ~/Public/src ; bash repairarea.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting park"
+echo " "
+echo "- Starting Park..."
 
 sshpass -p $password scp park.sh $username@$ParkHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$ParkHostName "cd ~/Public/src ; bash park.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting suppliersite"
+echo " "
+echo "- Starting SupplierSite..."
 
 sshpass -p $password scp suppliersite.sh $username@$SupplierSiteHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$SupplierSiteHostName "cd ~/Public/src ; bash suppliersite.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting manager"
+echo " "
+echo "- Starting Manager..."
 
 sshpass -p $password scp manager.sh $username@$ManagerHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$ManagerHostName "cd ~/Public/src ; bash manager.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting mechanic"
+echo " "
+echo "- Starting Mechanics..."
 
 sshpass -p $password scp mechanic.sh $username@$MechanicHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$MechanicHostName "cd ~/Public/src ; bash mechanic.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Setting customer"
+echo " "
+echo "- Starting Customers..."
 
 sshpass -p $password scp customer.sh $username@$CustomerHostName:~/Public/src
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$CustomerHostName "cd ~/Public/src ; bash customer.sh $registryHostName $registryPortNum $url" &
 sleep 5
 
-echo "Retrieving Log"
+echo " "
+echo "- Retrieving Log..."
 sshpass -p $password ssh -o StrictHostKeyChecking=no -f $username@$RepositoryHostName "cat Public/src/log.txt" > Log.txt
 sleep 2
 
-echo "Stopping rmi processes"
+echo " "
+echo "- Stopping RMI Processes..."
 bash kill_rmi.sh
 bash kill_ports.sh
 
-
-echo "Cleaning local classes"
+echo " "
+echo "Cleaning Local Classes..."
 
 bash cleanclasses.sh
 
-echo "Cleaning remote machines"
+echo " "
+echo "Cleaning Remote Machines..."
 
 bash remoteclean.sh
+
+echo " "
+echo "Done!"
