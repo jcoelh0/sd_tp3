@@ -333,6 +333,22 @@ public class Repository implements RepositoryInterface {
         String nameEntryBase = RegistryConfiguration.RMI_REGISTER_NAME;
         String nameEntryObject = RegistryConfiguration.RMI_REGISTRY_REPOSITORY_NAME;
         
+        
+        try {
+            SupplierSiteInterface ssi = (SupplierSiteInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_SUPPLIERSITE_NAME);
+            ssi.signalShutdown();
+        } 
+        catch (RemoteException e) {
+            System.out.println("Exception thrown while locating SupplierSite: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        catch (NotBoundException e) {
+            System.out.println("SupplierSite is not registered: " + e.getMessage() + "!");
+            System.exit(1);
+        }
+        
+        System.out.println("suuplier site end");
+        
         try {
             LoungeInterface li = (LoungeInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_LOUNGE_NAME);
             li.signalShutdown();
@@ -382,19 +398,6 @@ public class Repository implements RepositoryInterface {
         }
         catch (NotBoundException e) {
             System.out.println("Park is not registered: " + e.getMessage() + "!");
-            System.exit(1);
-        }
-        
-        try {
-            SupplierSiteInterface ssi = (SupplierSiteInterface) registry.lookup(RegistryConfiguration.RMI_REGISTRY_SUPPLIERSITE_NAME);
-            ssi.signalShutdown();
-        } 
-        catch (RemoteException e) {
-            System.out.println("Exception thrown while locating SupplierSite: " + e.getMessage() + "!");
-            System.exit(1);
-        }
-        catch (NotBoundException e) {
-            System.out.println("SupplierSite is not registered: " + e.getMessage() + "!");
             System.exit(1);
         }
         

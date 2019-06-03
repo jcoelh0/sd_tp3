@@ -1,6 +1,7 @@
 package registry;
 
 import interfaces.Register;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -16,10 +17,10 @@ public class ServerRegisterRemoteObject {
     /**
      * Main task.
      *
-     * @param args - 
+     * @param args -
      */
     public static void main(String[] args) {
-        
+
         /* get location of the registry service */
         String rmiRegHostName = args[0];
         int rmiRegPortNumb = Integer.parseInt(args[1]);
@@ -57,6 +58,5 @@ public class ServerRegisterRemoteObject {
             System.exit(1);
         }
         System.out.println("RegisterRemoteObject object was registered!");
-    
     }
 }
